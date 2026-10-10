@@ -2,11 +2,11 @@
 // pure so it runs the same in the browser and in tests.
 
 export const CUPS = 5;
-export const TIME_LIMIT = 20; // seconds
-export const PERFECT_TIME = 18; // seconds of pouring to fill every cup exactly
+export const TIME_LIMIT = 10; // seconds
+export const PERFECT_TIME = 8; // seconds of pouring to fill every cup exactly
 export const RIM = 1.25; // a cup holds 25% more than its line before spilling
-export const MIN_POUR = 1; // seconds; no cup fills faster than this
-export const MAX_POUR = 7; // seconds; or slower than this
+export const MIN_POUR = 0.5; // seconds; no cup fills faster than this
+export const MAX_POUR = 3.5; // seconds; or slower than this
 export const MIN_SPREAD = 3; // the slowest cup takes at least this many times as long as the fastest
 export const FIRST_DAY = "2026-10-10"; // Fillle #1
 
