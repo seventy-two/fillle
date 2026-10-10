@@ -16,23 +16,22 @@ export const FIRST_DAY = "2026-10-10"; // Fillle #1
 
 // The beers on offer, each in its own glass. volume is the glass's relative
 // size: bigger glasses tend to take longer to fill. foam is how much of a
-// full glass is head when it's settled, and rocky how lumpy that head is (0
-// for a smooth, skimmed head, 1 for a big rocky one).
+// full glass is head when it's settled.
 export const BEERS = [
-  { id: "duvel", name: "Duvel", label: "DUVEL", glass: "tulip", volume: 1.2, color: "#e8b53f", head: "#fffaf0", foam: 0.35, rocky: 1, tap: "#ffffff", ink: "#c8102e" },
-  { id: "kwak", name: "Kwak", label: "KWAK", glass: "kwak", volume: 1.1, color: "#b4601c", head: "#f5e3c3", foam: 0.15, rocky: 0.4, tap: "#6b3a1e", ink: "#f4d27a" },
-  { id: "chimay", name: "Chimay Blue", label: "CHIMAY", glass: "chalice", volume: 1.0, color: "#4a2410", head: "#e6d0a8", foam: 0.18, rocky: 0.5, tap: "#1d3f8f", ink: "#f2d16b" },
-  { id: "hoegaarden", name: "Hoegaarden", label: "HOEGAARDEN", glass: "tumbler", volume: 1.3, color: "#f1e1a6", head: "#ffffff", foam: 0.25, rocky: 0.3, tap: "#78b7e0", ink: "#ffffff" },
-  { id: "stella", name: "Stella Artois", label: "STELLA", glass: "stella", volume: 0.9, color: "#e5b13a", head: "#fffdf5", foam: 0.18, rocky: 0.15, tap: "#9e1b32", ink: "#e5c06b" },
-  { id: "jupiler", name: "Jupiler", label: "JUPILER", glass: "pils", volume: 1.0, color: "#eec55c", head: "#ffffff", foam: 0.18, rocky: 0.15, tap: "#d7262b", ink: "#ffffff" },
-  { id: "orval", name: "Orval", label: "ORVAL", glass: "orval", volume: 1.2, color: "#cf7d28", head: "#fbeed6", foam: 0.3, rocky: 1, tap: "#0f5e73", ink: "#f6e7c1" },
-  { id: "delirium", name: "Delirium Tremens", label: "DELIRIUM", glass: "delirium", volume: 1.1, color: "#eccd66", head: "#ffffff", foam: 0.3, rocky: 0.8, tap: "#f08bb4", ink: "#2a2a6a" },
-  { id: "leffe", name: "Leffe Blonde", label: "LEFFE", glass: "goblet", volume: 1.1, color: "#dc9c2c", head: "#fff6e2", foam: 0.2, rocky: 0.5, tap: "#3a2316", ink: "#d9b25f" },
-  { id: "westmalle", name: "Westmalle Tripel", label: "WESTMALLE", glass: "westmalle", volume: 1.2, color: "#f0c75a", head: "#ffffff", foam: 0.3, rocky: 0.9, tap: "#efe6d2", ink: "#5a2b1e" },
-  { id: "karmeliet", name: "Tripel Karmeliet", label: "KARMELIET", glass: "karmeliet", volume: 1.1, color: "#ebbc4e", head: "#fffaf0", foam: 0.28, rocky: 0.8, tap: "#f3e9cf", ink: "#6b4a1e" },
-  { id: "kriek", name: "Lindemans Kriek", label: "KRIEK", glass: "flute", volume: 0.8, color: "#9c1c38", head: "#f7c9d2", foam: 0.12, rocky: 0.3, tap: "#7a1028", ink: "#ffffff" },
-  { id: "rodenbach", name: "Rodenbach", label: "RODENBACH", glass: "rodenbach", volume: 1.0, color: "#7a2a18", head: "#e9d6b8", foam: 0.06, rocky: 0.1, tap: "#ad1f23", ink: "#f2d16b" },
-  { id: "dekoninck", name: "De Koninck", label: "DE KONINCK", glass: "bolleke", volume: 0.8, color: "#b8651f", head: "#f3e3c4", foam: 0.15, rocky: 0.4, tap: "#c8102e", ink: "#ffffff" },
+  { id: "duvel", name: "Duvel", label: "DUVEL", glass: "tulip", volume: 1.2, color: "#e8b53f", head: "#fffaf0", foam: 0.35, tap: "#ffffff", ink: "#c8102e" },
+  { id: "kwak", name: "Kwak", label: "KWAK", glass: "kwak", volume: 1.1, color: "#b4601c", head: "#f5e3c3", foam: 0.15, tap: "#6b3a1e", ink: "#f4d27a" },
+  { id: "chimay", name: "Chimay Blue", label: "CHIMAY", glass: "chalice", volume: 1.0, color: "#4a2410", head: "#e6d0a8", foam: 0.18, tap: "#1d3f8f", ink: "#f2d16b" },
+  { id: "hoegaarden", name: "Hoegaarden", label: "HOEGAARDEN", glass: "tumbler", volume: 1.3, color: "#f1e1a6", head: "#ffffff", foam: 0.25, tap: "#78b7e0", ink: "#ffffff" },
+  { id: "stella", name: "Stella Artois", label: "STELLA", glass: "stella", volume: 0.9, color: "#e5b13a", head: "#fffdf5", foam: 0.18, tap: "#9e1b32", ink: "#e5c06b" },
+  { id: "jupiler", name: "Jupiler", label: "JUPILER", glass: "pils", volume: 1.0, color: "#eec55c", head: "#ffffff", foam: 0.18, tap: "#d7262b", ink: "#ffffff" },
+  { id: "orval", name: "Orval", label: "ORVAL", glass: "orval", volume: 1.2, color: "#cf7d28", head: "#fbeed6", foam: 0.3, tap: "#0f5e73", ink: "#f6e7c1" },
+  { id: "delirium", name: "Delirium Tremens", label: "DELIRIUM", glass: "delirium", volume: 1.1, color: "#eccd66", head: "#ffffff", foam: 0.3, tap: "#f08bb4", ink: "#2a2a6a" },
+  { id: "leffe", name: "Leffe Blonde", label: "LEFFE", glass: "goblet", volume: 1.1, color: "#dc9c2c", head: "#fff6e2", foam: 0.2, tap: "#3a2316", ink: "#d9b25f" },
+  { id: "westmalle", name: "Westmalle Tripel", label: "WESTMALLE", glass: "westmalle", volume: 1.2, color: "#f0c75a", head: "#ffffff", foam: 0.3, tap: "#efe6d2", ink: "#5a2b1e" },
+  { id: "karmeliet", name: "Tripel Karmeliet", label: "KARMELIET", glass: "karmeliet", volume: 1.1, color: "#ebbc4e", head: "#fffaf0", foam: 0.28, tap: "#f3e9cf", ink: "#6b4a1e" },
+  { id: "kriek", name: "Lindemans Kriek", label: "KRIEK", glass: "flute", volume: 0.8, color: "#9c1c38", head: "#f7c9d2", foam: 0.12, tap: "#7a1028", ink: "#ffffff" },
+  { id: "rodenbach", name: "Rodenbach", label: "RODENBACH", glass: "rodenbach", volume: 1.0, color: "#7a2a18", head: "#e9d6b8", foam: 0.06, tap: "#ad1f23", ink: "#f2d16b" },
+  { id: "dekoninck", name: "De Koninck", label: "DE KONINCK", glass: "bolleke", volume: 0.8, color: "#b8651f", head: "#f3e3c4", foam: 0.15, tap: "#c8102e", ink: "#ffffff" },
 ];
 export const beerById = Object.fromEntries(BEERS.map((b) => [b.id, b]));
 

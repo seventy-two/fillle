@@ -79,7 +79,6 @@ test("every beer has a distinct glass, and a head", () => {
   for (const b of BEERS) {
     assert.ok(GLASS_SHAPES[b.glass], `${b.id}: no glass shape`);
     assert.ok(b.foam > 0 && b.foam < 0.5, `${b.id}: foam ${b.foam}`);
-    assert.ok(b.rocky >= 0 && b.rocky <= 1, `${b.id}: rocky ${b.rocky}`);
   }
 });
 

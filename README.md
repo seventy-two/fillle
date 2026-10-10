@@ -13,8 +13,8 @@ do, within 15 seconds.
   Leffe's goblet, Westmalle's chalice, Tripel Karmeliet's tall flared glass,
   Lindemans Kriek's flute, Rodenbach's straight glass and De Koninck's
   bolleke. Each tap shows its glass's outline underneath.
-- Each beer has its own head: Duvel, Orval and Westmalle's are big and rocky,
-  Stella and Jupiler's skimmed and smooth, Kriek's pink, Rodenbach's barely
+- Each beer has its own head: Duvel, Orval and Westmalle's are big,
+  Stella and Jupiler's skimmed to a couple of fingers, Kriek's pink, Rodenbach's barely
   there. A head grows with the beer, froths up while you pour and settles
   after; it changes where the beer stops and the foam starts, never the top
   of the foam, which is what's scored.
@@ -47,7 +47,7 @@ It's a static page with no server.
 - `patrons.js` has the ASCII regulars and `glasses.js` the SVG glass shapes.
   Beer rises linearly from the bottom of a glass's bowl to its brim, so a
   glass's shape changes how it looks, not how it scores. Each beer's `foam`
-  and `rocky` in `game.js` set its head's depth and lumpiness.
+  in `game.js` sets how deep its head is.
 - `app.js` draws the bar and handles input. A pour's result comes from the
   press and release event times, not animation frames, so a slow device
   doesn't change the score.

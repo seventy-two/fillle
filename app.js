@@ -179,25 +179,12 @@ function spanAt(bowl, y) {
   return xs.length ? [Math.min(...xs), Math.max(...xs)] : [50, 50];
 }
 
-// crownPath is the lumpy top of a head: a row of foam bubbles, each up to
-// bubble tall, along a dome rising heap above y between x0 and x1 (an
-// overpoured glass heaps up over the brim). Rockier heads have more, smaller
-// and more uneven bubbles.
-function crownPath(x0, x1, y, heap, bubble, rocky) {
-  const w = x1 - x0;
-  if (w < 1 || heap + bubble < 0.2) return "";
-  const n = Math.max(2, Math.round(w / (rocky > 0.6 ? 7 : 11)));
-  const at = (k) => {
-    const t = (2 * k) / n - 1;
-    return [x0 + (w * k) / n, y - heap * (1 - t * t)];
-  };
-  const pt = ([x, py]) => `${x.toFixed(2)},${py.toFixed(2)}`;
-  let d = `M${pt(at(0))}`;
-  for (let k = 0; k < n; k++) {
-    const ry = Math.max(0.1, bubble * (1 - rocky * 0.45 * (((k * 7 + 3) % 5) / 4)));
-    d += `A${(w / (2 * n)).toFixed(2)},${ry.toFixed(2)} 0 0 1 ${pt(at(k + 1))}`;
-  }
-  return d + "Z";
+// crownPath is the foam heaped over the brim of an overpoured glass: a smooth
+// dome rising height above y between x0 and x1.
+function crownPath(x0, x1, y, height) {
+  if (x1 - x0 < 1 || height < 0.2) return "";
+  const mid = (x0 + x1) / 2;
+  return `M${x0.toFixed(2)},${y.toFixed(2)}Q${mid.toFixed(2)},${(y - 2 * height).toFixed(2)} ${x1.toFixed(2)},${y.toFixed(2)}Z`;
 }
 
 function polygonPath(points) {
@@ -316,14 +303,11 @@ function draw(now) {
     const headShape = level > 0 ? polygonPath(cutPolygon(bowl, y, headBottom)) : "";
     if (c.head.getAttribute("d") !== headShape) c.head.setAttribute("d", headShape);
 
-    // The crown: foam bubbles on top, livelier mid-pour, heaping up over the
-    // brim when it's overpoured.
-    const rocky = info && !g.mixed ? info.rocky : 0.3;
+    // The crown: foam heaping up over the brim when it's overpoured.
     const over = Math.max(0, level - 1) / (MAX_LEVEL - 1);
     const [x0, x1] = spanAt(bowl, y);
-    const bubble = Math.min(1, level * 4) * (0.6 + 1.8 * rocky + 1.2 * c.froth) + 2 * over;
     const spread = 4 * over;
-    const crownShape = info && level > 0.02 ? crownPath(x0 - spread, x1 + spread, y, 14 * over, bubble, rocky) : "";
+    const crownShape = info ? crownPath(x0 - spread, x1 + spread, y, 14 * over) : "";
     if (c.crown.getAttribute("d") !== crownShape) c.crown.setAttribute("d", crownShape);
     const headColor = g.mixed ? MIXED_HEAD : info ? info.head : "transparent";
     c.head.style.fill = c.crown.style.fill = headColor;
