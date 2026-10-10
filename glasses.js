@@ -1,6 +1,6 @@
 // SVG shapes for each beer's glass, in a 100×200 box standing on y = 196.
 // outline is the whole glass; bowl is the inside that holds beer, from top
-// (the rim) to bottom. Beer rises linearly from bottom to top, so a glass's
+// (the brim) to bottom. Beer rises linearly from bottom to top, so a glass's
 // shape changes how it looks, not how it scores.
 
 export const GLASS_SHAPES = {
@@ -63,4 +63,47 @@ export const GLASS_SHAPES = {
     top: 24,
     bottom: 128,
   },
+  // Leffe: a wide goblet, straight-sided above a round bowl.
+  goblet: {
+    outline: "M16,52 L84,52 L84,78 C84,112 70,128 55,131 L55,178 C72,180 74,192 50,194 C26,192 28,180 45,178 L45,131 C30,128 16,112 16,78 Z",
+    bowl: "M19,54 L81,54 L81,78 C81,110 68,125 50,127 C32,125 19,110 19,78 Z",
+    top: 54,
+    bottom: 127,
+  },
+  // Westmalle: a broad chalice with tapering sides and a flat bottom.
+  westmalle: {
+    outline: "M20,60 L80,60 L74,118 C72,126 62,130 56,131 L56,178 C72,180 74,192 50,194 C26,192 28,180 44,178 L44,131 C38,130 28,126 26,118 Z",
+    bowl: "M23,62 L77,62 L71.5,116 C69.5,123 60,127 50,127 C40,127 30.5,123 28.5,116 Z",
+    top: 62,
+    bottom: 127,
+  },
+  // Tripel Karmeliet: tall and slim, fuller low down, flaring at the rim.
+  karmeliet: {
+    outline: "M28,14 C32,40 26,60 28,90 C30,130 42,146 46,150 L46,182 C32,184 30,193 50,195 C70,193 68,184 54,182 L54,150 C58,146 70,130 72,90 C74,60 68,40 72,14 Z",
+    bowl: "M30.5,16 C34,40 28.5,60 30.5,90 C32.5,126 42,141 50,144 C58,141 67.5,126 69.5,90 C71.5,60 66,40 69.5,16 Z",
+    top: 16,
+    bottom: 144,
+  },
+  // Lindemans Kriek: a narrow flute on a stem.
+  flute: {
+    outline: "M36,14 L64,14 C64,70 62,110 54,124 L53,180 C68,182 70,192 50,194 C30,192 32,182 47,180 L46,124 C38,110 36,70 36,14 Z",
+    bowl: "M38.5,16 L61.5,16 C61.5,70 59.5,108 50,120 C40.5,108 38.5,70 38.5,16 Z",
+    top: 16,
+    bottom: 120,
+  },
+  // Rodenbach: a straight, slightly tapered glass on a short foot.
+  rodenbach: {
+    outline: "M24,30 L76,30 L71,170 L71,180 C71,186 75,188 75,194 L25,194 C25,188 29,186 29,180 L29,170 Z",
+    bowl: "M26.5,32 L73.5,32 L68.6,168 L31.4,168 Z",
+    top: 32,
+    bottom: 168,
+  },
+  // De Koninck: Antwerp's bolleke, a small round bowl that narrows at the rim.
+  bolleke: {
+    outline: "M30,86 C18,100 16,140 46,152 L46,178 C32,180 30,192 50,194 C70,192 68,180 54,178 L54,152 C84,140 82,100 70,86 Z",
+    bowl: "M32.5,88 C21,101 19.5,137 50,148 C80.5,137 79,101 67.5,88 Z",
+    top: 88,
+    bottom: 148,
+  },
 };
+

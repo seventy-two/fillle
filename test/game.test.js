@@ -1,11 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  GLASSES, PERFECT_TIME, RIM, MIN_POUR, MAX_POUR, MIN_SPREAD, BEERS, beerById,
-  dayKey, dayNumber, dayGame, orderText, pour, cupScore, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji,
+  GLASSES, PERFECT_TIME, MAX_LEVEL, MIN_POUR, MAX_POUR, MIN_SPREAD, BEERS, beerById,
+  dayKey, dayNumber, dayGame, orderText, pour, froth, headShare, SURGE, cupScore, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji,
   shareText, msUntilNextDay, updateStats,
 } from "../game.js";
 import { PATRONS } from "../patrons.js";
+import { GLASS_SHAPES } from "../glasses.js";
 
 const days = (n) => Array.from({ length: n }, (_, d) => dayKey(new Date(Date.UTC(2026, 9, 10 + d))));
 
@@ -70,14 +71,39 @@ test("the patron's order reads naturally", () => {
   assert.equal(orderText([{ beer: "kwak", count: 1 }, { beer: "orval", count: 4 }]), "A Kwak and four Orval, please.");
 });
 
-test("every beer has a distinct glass", () => {
+test("every beer has a distinct glass, and a head", () => {
+  assert.ok(BEERS.length >= 14);
   assert.equal(new Set(BEERS.map((b) => b.glass)).size, BEERS.length);
+  assert.equal(new Set(BEERS.map((b) => b.id)).size, BEERS.length);
+  for (const b of BEERS) {
+    assert.ok(GLASS_SHAPES[b.glass], `${b.id}: no glass shape`);
+    assert.ok(b.foam > 0 && b.foam < 0.5, `${b.id}: foam ${b.foam}`);
+    assert.ok(b.rocky >= 0 && b.rocky <= 1, `${b.id}: rocky ${b.rocky}`);
+  }
 });
 
-test("pouring fills at the glass's rate and spills at the rim", () => {
+test("every beer turns up on the taps", () => {
+  const seen = new Set(days(1000).flatMap((key) => dayGame(key).taps));
+  assert.equal(seen.size, BEERS.length);
+});
+
+test("heads froth up while pouring and settle afterwards", () => {
+  assert.equal(froth(0, 0, true), 0);
+  assert.ok(froth(0, 0.25, true) > 0.6, "builds quickly");
+  assert.ok(froth(1, 0.25, false) > 0.7, "settles slowly");
+  assert.ok(froth(1, 5, false) < 0.01, "and does settle");
+  assert.equal(froth(0.5, -1, false), 0.5, "no time, no change");
+
+  assert.equal(headShare("duvel", false, 0), beerById.duvel.foam);
+  assert.ok(Math.abs(headShare("duvel", false, 1) - beerById.duvel.foam * (1 + SURGE)) < 1e-9);
+  assert.ok(headShare("duvel", false, 0) > headShare("rodenbach", false, 0), "Duvel has the bigger head");
+  assert.ok(headShare("duvel", true, 0) < 1);
+});
+
+test("pouring fills at the glass's rate and runs over past the brim", () => {
   assert.equal(pour(0, 4, 2), 0.5);
   assert.equal(pour(0.5, 4, 2), 1);
-  assert.equal(pour(0, 4, 100), RIM);
+  assert.equal(pour(0, 4, 100), MAX_LEVEL);
   assert.equal(pour(0.3, 4, -1), 0.3, "no negative pours");
 });
 
@@ -86,7 +112,7 @@ test("scoring: closeness to the line, and nothing for the wrong beer", () => {
   assert.equal(cupScore(0.95), 90);
   assert.equal(cupScore(1.05), 90);
   assert.equal(cupScore(0.5), 0);
-  assert.equal(cupScore(RIM), 50);
+  assert.equal(cupScore(MAX_LEVEL), 50);
 
   const right = { beer: "duvel", mixed: false, level: 0.95 };
   assert.equal(glassScore(right, "duvel"), 90);

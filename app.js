@@ -1,6 +1,6 @@
 import {
-  GLASSES, TIME_LIMIT, READY_TIME, RIM, beerById,
-  dayKey, dayGame, orderText, pour, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji, shareText,
+  GLASSES, TIME_LIMIT, READY_TIME, MAX_LEVEL, beerById,
+  dayKey, dayGame, orderText, pour, froth, headShare, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji, shareText,
   msUntilNextDay, updateStats,
 } from "./game.js";
 import { PATRONS } from "./patrons.js";
@@ -9,12 +9,13 @@ import { GLASS_SHAPES } from "./glasses.js";
 const KEY = dayKey();
 const GAME = dayGame(KEY);
 const PATRON = PATRONS[GAME.patron];
-const DAY_STORE = "fillle:day:" + KEY;
+const DAY_STORE = "fillle:day2:" + KEY; // day2: the brim-filling rules, from 10 Oct 2026
 const STATS_STORE = "fillle:stats";
 const HELP_STORE = "fillle:seen-help";
 const SHARE_URL = location.origin + location.pathname;
 const TAP_KEYS = "qwert";
 const MIXED_COLOR = "#7a6248";
+const MIXED_HEAD = "#cdbb9f";
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -87,7 +88,6 @@ function selectTap(i, t) {
 
 function buildGlass(i) {
   const shape = GLASS_SHAPES[beerById[GAME.glasses[i]].glass];
-  const lineY = shape.bottom - (shape.bottom - shape.top) / RIM;
   const el = document.createElement("button");
   el.type = "button";
   el.className = "glass";
@@ -99,20 +99,28 @@ function buildGlass(i) {
       <path class="outline" d="${shape.outline}"/>
       <path class="beer" d=""/>
       <path class="head" d=""/>
+      <path class="crown" d=""/>
       ${shape.facets ? `<path class="facets" d="${shape.facets}"/>` : ""}
-      <path class="line" d="M10,${lineY} L90,${lineY}"/>
-      <rect class="drip" x="4" y="186" width="5" height="10" rx="2.5"/>
-      <rect class="drip" x="91" y="186" width="5" height="10" rx="2.5"/>
+      <rect class="drip" width="5" height="12" rx="2.5"/>
+      <rect class="drip" width="5" height="12" rx="2.5"/>
     </svg>
     <span class="key">${i + 1}</span>
     <span class="out"></span>`;
+  const bowl = bowlPolygon(shape.bowl, el.querySelector("svg"));
+  // Foam that runs over the brim trickles down the outside from its edges.
+  const [left, right] = spanAt(bowl, shape.top);
+  const drips = el.querySelectorAll(".drip");
+  drips[0].setAttribute("x", left - 4);
+  drips[1].setAttribute("x", right - 1);
+  drips.forEach((d) => d.setAttribute("y", shape.top));
   glassEls.push({
-    el, shape,
-    bowl: bowlPolygon(shape.bowl, el.querySelector("svg")),
+    el, shape, bowl, drips,
     beer: el.querySelector(".beer"),
     head: el.querySelector(".head"),
+    crown: el.querySelector(".crown"),
     stream: el.querySelector(".stream"),
     out: el.querySelector(".out"),
+    froth: 0, // 0 settled, 1 frothing from a fresh pour
   });
   el.addEventListener("pointerdown", (e) => {
     if (!e.isPrimary || (e.pointerType === "mouse" && e.button !== 0)) return;
@@ -163,6 +171,33 @@ function cutPolygon(points, top, bottom) {
     return out;
   };
   return clip(clip(points, (p) => p[1] >= top, top), (p) => p[1] <= bottom, bottom);
+}
+
+// spanAt is the left and right edges of a bowl at height y.
+function spanAt(bowl, y) {
+  const xs = cutPolygon(bowl, y, y + 0.5).map((p) => p[0]);
+  return xs.length ? [Math.min(...xs), Math.max(...xs)] : [50, 50];
+}
+
+// crownPath is the lumpy top of a head: a row of foam bubbles, each up to
+// bubble tall, along a dome rising heap above y between x0 and x1 (an
+// overpoured glass heaps up over the brim). Rockier heads have more, smaller
+// and more uneven bubbles.
+function crownPath(x0, x1, y, heap, bubble, rocky) {
+  const w = x1 - x0;
+  if (w < 1 || heap + bubble < 0.2) return "";
+  const n = Math.max(2, Math.round(w / (rocky > 0.6 ? 7 : 11)));
+  const at = (k) => {
+    const t = (2 * k) / n - 1;
+    return [x0 + (w * k) / n, y - heap * (1 - t * t)];
+  };
+  const pt = ([x, py]) => `${x.toFixed(2)},${py.toFixed(2)}`;
+  let d = `M${pt(at(0))}`;
+  for (let k = 0; k < n; k++) {
+    const ry = Math.max(0.1, bubble * (1 - rocky * 0.45 * (((k * 7 + 3) % 5) / 4)));
+    d += `A${(w / (2 * n)).toFixed(2)},${ry.toFixed(2)} 0 0 1 ${pt(at(k + 1))}`;
+  }
+  return d + "Z";
 }
 
 function polygonPath(points) {
@@ -258,23 +293,47 @@ function currentLevel(i, now) {
   return pour(g.level, GAME.times[i], (Math.min(now, state.endAt) - p.since) / 1000);
 }
 
+let lastDraw = 0;
+
 function draw(now) {
+  const dt = lastDraw ? (now - lastDraw) / 1000 : 0;
+  lastDraw = now;
   for (let i = 0; i < GLASSES; i++) {
     const g = state.glasses[i];
-    const { shape, bowl, beer, head, el } = glassEls[i];
+    const c = glassEls[i];
+    const { shape, bowl, el } = c;
     const level = currentLevel(i, now);
-    const y = shape.bottom - (Math.min(level, RIM) / RIM) * (shape.bottom - shape.top);
+    c.froth = state.finished ? 0 : froth(c.froth, dt, state.pouring?.glass === i);
     const info = g.beer && beerById[g.beer];
-    const beerShape = level > 0 ? polygonPath(cutPolygon(bowl, y, Infinity)) : "";
-    if (beer.getAttribute("d") !== beerShape) beer.setAttribute("d", beerShape);
-    beer.style.fill = g.mixed ? MIXED_COLOR : info ? info.color : "transparent";
-    const headShape = level > 0.04 ? polygonPath(cutPolygon(bowl, y, y + 5)) : "";
-    if (head.getAttribute("d") !== headShape) head.setAttribute("d", headShape);
-    head.style.fill = g.mixed ? "#cdbb9f" : info ? info.head : "transparent";
+
+    // The top of the foam is the level; under it the head takes its share of
+    // the glass, more while it's frothing, and the beer the rest.
+    const y = shape.bottom - Math.min(level, 1) * (shape.bottom - shape.top);
+    const headBottom = info ? y + headShare(g.beer, g.mixed, c.froth) * (shape.bottom - y) : y;
+    const beerShape = level > 0 ? polygonPath(cutPolygon(bowl, headBottom, Infinity)) : "";
+    if (c.beer.getAttribute("d") !== beerShape) c.beer.setAttribute("d", beerShape);
+    c.beer.style.fill = g.mixed ? MIXED_COLOR : info ? info.color : "transparent";
+    const headShape = level > 0 ? polygonPath(cutPolygon(bowl, y, headBottom)) : "";
+    if (c.head.getAttribute("d") !== headShape) c.head.setAttribute("d", headShape);
+
+    // The crown: foam bubbles on top, livelier mid-pour, heaping up over the
+    // brim when it's overpoured.
+    const rocky = info && !g.mixed ? info.rocky : 0.3;
+    const over = Math.max(0, level - 1) / (MAX_LEVEL - 1);
+    const [x0, x1] = spanAt(bowl, y);
+    const bubble = Math.min(1, level * 4) * (0.6 + 1.8 * rocky + 1.2 * c.froth) + 2 * over;
+    const spread = 4 * over;
+    const crownShape = info && level > 0.02 ? crownPath(x0 - spread, x1 + spread, y, 14 * over, bubble, rocky) : "";
+    if (c.crown.getAttribute("d") !== crownShape) c.crown.setAttribute("d", crownShape);
+    const headColor = g.mixed ? MIXED_HEAD : info ? info.head : "transparent";
+    c.head.style.fill = c.crown.style.fill = headColor;
+    c.drips.forEach((d) => { d.style.fill = headColor; });
+
     // The stream runs down to the beer, narrower than any glass's neck so the
     // surface stays visible either side of it.
-    glassEls[i].stream.setAttribute("height", Math.max(0, y + 44));
-    el.classList.toggle("spilled", level >= RIM);
+    c.stream.setAttribute("height", Math.max(0, y + 44));
+    el.classList.toggle("overflowing", level > 1.005);
+    el.classList.toggle("spilled", level >= MAX_LEVEL);
   }
   const left = state.started ? Math.max(0, state.endAt - now) / 1000 : TIME_LIMIT;
   $("clock").textContent = state.finished ? "0.0" : left.toFixed(1);
@@ -350,7 +409,7 @@ function showResult(stats) {
       const score = glassScore(g, GAME.glasses[i]);
       const cls = score >= 95 ? "good" : score >= 80 ? "ok" : score >= 50 ? "meh" : "bad";
       html = `<span class="pts ${cls}">${score}</span><span class="pct">${(g.level * 100).toFixed(1)}%</span>`;
-      label = `Glass ${i + 1}, ${expected.name}: filled to ${(g.level * 100).toFixed(1)}% of the line, ${score} points`;
+      label = `Glass ${i + 1}, ${expected.name}: filled to ${(g.level * 100).toFixed(1)}% of the brim, ${score} points`;
     }
     c.out.innerHTML = `${html}<span class="beer-name">${expected.name}</span>`;
     c.el.setAttribute("aria-label", label);
