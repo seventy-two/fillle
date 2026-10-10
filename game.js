@@ -2,12 +2,12 @@
 // pure so it runs the same in the browser and in tests.
 
 export const CUPS = 5;
-export const TIME_LIMIT = 30; // seconds
-export const PERFECT_TIME = 28; // seconds of pouring to fill every cup exactly
+export const TIME_LIMIT = 20; // seconds
+export const PERFECT_TIME = 18; // seconds of pouring to fill every cup exactly
 export const RIM = 1.25; // a cup holds 25% more than its line before spilling
-export const MIN_POUR = 2.5; // seconds; no cup fills faster than this
-export const MAX_POUR = 9; // seconds; or slower than this
-export const MIN_SPREAD = 1.6; // the slowest cup takes at least this many times as long as the fastest
+export const MIN_POUR = 1; // seconds; no cup fills faster than this
+export const MAX_POUR = 7; // seconds; or slower than this
+export const MIN_SPREAD = 3; // the slowest cup takes at least this many times as long as the fastest
 export const FIRST_DAY = "2026-10-10"; // Fillle #1
 
 // mulberry32: a small, fast seeded PRNG.
@@ -48,7 +48,9 @@ export function dayNumber(key) {
 export function pourTimes(key) {
   const rand = mulberry32(hash("fillle:" + key));
   for (;;) {
-    const weights = Array.from({ length: CUPS }, () => 0.4 + 1.2 * rand());
+    // Weights spread exponentially from 1 to 8, so a day mixes very fast and
+    // slow cups rather than clustering around the average.
+    const weights = Array.from({ length: CUPS }, () => Math.exp(Math.log(8) * rand()));
     const total = weights.reduce((a, b) => a + b, 0);
     const times = weights.map((w) => (PERFECT_TIME * w) / total);
     const spread = Math.max(...times) / Math.min(...times);

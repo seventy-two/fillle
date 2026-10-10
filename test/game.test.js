@@ -18,7 +18,7 @@ test("everyone gets the same cups on a day, and different cups each day", () => 
   assert.notDeepEqual(pourTimes("2026-10-10"), pourTimes("2026-10-11"));
 });
 
-test("perfect pouring takes exactly 28 seconds, with fast and slow cups", () => {
+test("perfect pouring takes exactly PERFECT_TIME, with fast and slow cups", () => {
   for (let d = 0; d < 1000; d++) {
     const key = dayKey(new Date(Date.UTC(2026, 9, 10 + d)));
     const times = pourTimes(key);
