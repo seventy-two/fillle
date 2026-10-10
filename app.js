@@ -190,20 +190,22 @@ function setHint(text, ready = false) {
 
 // --- The patron's order
 
-// talk types the order into the speech bubble as if the patron is mid-sentence,
-// then gives the player READY_TIME seconds before the clock starts by itself.
+// talk types the order into the speech bubble as if the patron is mid-sentence.
+// The player gets READY_TIME seconds from when they start talking before the
+// clock starts by itself, so listening to the order uses up some of it.
 function talk() {
   const text = orderText(GAME.order);
   const bubble = $("bubble-text");
-  const done = () => {
-    bubble.parentElement.classList.remove("typing");
+  const begin = () => {
     if (!state.started && !state.finished) {
       state.startsAt = Date.now() + READY_TIME * 1000;
       save();
     }
   };
+  const done = () => bubble.parentElement.classList.remove("typing");
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
     bubble.textContent = text;
+    begin();
     return done();
   }
   bubble.textContent = "";
@@ -214,7 +216,7 @@ function talk() {
     if (n >= text.length) return done();
     setTimeout(next, /[,.]/.test(text[n - 1]) ? 220 : 32);
   };
-  setTimeout(next, 800); // once the patron has walked up
+  setTimeout(() => { begin(); next(); }, 800); // once the patron has walked up
 }
 
 function startPour(i, t) {

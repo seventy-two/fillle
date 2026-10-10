@@ -6,7 +6,7 @@ import { PATRONS } from "./patrons.js";
 
 export const GLASSES = 5;
 export const TIME_LIMIT = 15; // seconds
-export const READY_TIME = 10; // seconds after the patron finishes ordering before the clock starts by itself
+export const READY_TIME = 10; // seconds from when the patron starts ordering until the clock starts by itself
 export const PERFECT_TIME = 8; // seconds of pouring to fill every glass exactly
 export const RIM = 1.25; // a glass holds 25% more than its line before spilling
 export const MIN_POUR = 0.5; // seconds; no glass fills faster than this

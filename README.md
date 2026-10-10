@@ -12,9 +12,9 @@ pour each one into its glass, stopping at the line, within 15 seconds.
 - The bar has more taps than the order needs, so some are decoys.
 - Each beer pours at its own speed. The patron, order and speeds change every
   UTC day and are the same for everyone that day.
-- The patron types out their order. Once they've finished you get 10 seconds
-  to get ready before the clock starts by itself (or pick a tap or pour to
-  start it sooner), so there's only so long to plan.
+- The patron types out their order. From when they start talking you get 10
+  seconds to get ready before the clock starts by itself (or pick a tap or
+  pour to start it sooner), so there's only so long to plan.
 - Pouring every glass exactly to its line takes 8 seconds, leaving 7 of the 15
   for picking taps and moving between glasses.
 - Each glass scores up to 100, losing 2 points for every 1% over or under the
