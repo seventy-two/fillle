@@ -120,7 +120,11 @@ const COUNT_WORDS = ["", "a", "two", "three", "four", "five"];
 // orderText is what the patron says, e.g. "Two Duvel, a Kwak and two Chimay
 // Blue, please."
 export function orderText(order) {
-  const parts = order.map((o) => `${COUNT_WORDS[o.count]} ${beerById[o.beer].name}`);
+  const parts = order.map((o) => {
+    const name = beerById[o.beer].name;
+    const count = o.count === 1 && /^[aeiou]/i.test(name) ? "an" : COUNT_WORDS[o.count];
+    return `${count} ${name}`;
+  });
   const list = parts.length > 1 ? parts.slice(0, -1).join(", ") + " and " + parts.at(-1) : parts[0];
   return list.charAt(0).toUpperCase() + list.slice(1) + ", please.";
 }

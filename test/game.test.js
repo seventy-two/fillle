@@ -69,6 +69,7 @@ test("the patron's order reads naturally", () => {
   assert.equal(orderText([{ beer: "duvel", count: 2 }, { beer: "kwak", count: 1 }, { beer: "chimay", count: 2 }]),
     "Two Duvel, a Kwak and two Chimay Blue, please.");
   assert.equal(orderText([{ beer: "kwak", count: 1 }, { beer: "orval", count: 4 }]), "A Kwak and four Orval, please.");
+  assert.equal(orderText([{ beer: "orval", count: 1 }, { beer: "kwak", count: 4 }]), "An Orval and four Kwak, please.");
 });
 
 test("every beer has a distinct glass, and a head", () => {
