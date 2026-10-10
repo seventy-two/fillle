@@ -1,0 +1,65 @@
+// SVG shapes for each beer's glass, in a 100×200 box standing on y = 196.
+// outline is the whole glass; bowl is the inside that holds beer, from top
+// (the rim) to bottom. Beer rises linearly from bottom to top, so a glass's
+// shape changes how it looks, not how it scores.
+
+export const GLASS_SHAPES = {
+  // Jupiler: a tall, straight pils glass.
+  pils: {
+    outline: "M30,10 L70,10 L64,188 Q64,194 58,194 L42,194 Q36,194 36,188 Z",
+    bowl: "M32.5,12 L67.5,12 L62,184 L38,184 Z",
+    top: 12,
+    bottom: 184,
+  },
+  // Hoegaarden: a chunky hexagonal tumbler with a thick base.
+  tumbler: {
+    outline: "M20,72 L80,72 L74,194 L26,194 Z",
+    bowl: "M23,74 L77,74 L72.5,180 L27.5,180 Z",
+    facets: "M38,74 L41,192 M62,74 L59,192",
+    top: 74,
+    bottom: 180,
+  },
+  // Duvel: a stemmed tulip that narrows towards the rim.
+  tulip: {
+    outline: "M30,40 C26,55 14,80 18,105 C22,130 40,138 46,142 L46,180 C30,182 28,192 50,194 C72,192 70,182 54,180 L54,142 C60,138 78,130 82,105 C86,80 74,55 70,40 Z",
+    bowl: "M32,42 C28,56 17,80 21,105 C25,128 40,135 50,136 C60,135 75,128 79,105 C83,80 72,56 68,42 Z",
+    top: 42,
+    bottom: 136,
+  },
+  // Kwak: a round bulb on a long neck, held in a wooden stand.
+  kwak: {
+    outline: "M34,10 L66,10 C60,30 56,45 56,60 L56,120 C78,128 80,170 50,176 C20,170 22,128 44,120 L44,60 C44,45 40,30 34,10 Z",
+    bowl: "M36.5,12 L63.5,12 C58,30 54,45 54,60 L54,122 C74,130 76,168 50,173 C24,168 26,130 46,122 L46,60 C46,45 42,30 36.5,12 Z",
+    stand: "M22,146 L22,196 M78,146 L78,196 M18,196 L82,196 M22,150 L78,150",
+    top: 12,
+    bottom: 173,
+  },
+  // Chimay: a wide, shallow chalice on a thick stem.
+  chalice: {
+    outline: "M14,70 L86,70 C86,110 70,128 56,130 L56,178 C74,180 76,192 50,194 C24,192 26,180 44,178 L44,130 C30,128 14,110 14,70 Z",
+    bowl: "M17,72 L83,72 C83,108 68,125 50,126 C32,125 17,108 17,72 Z",
+    top: 72,
+    bottom: 126,
+  },
+  // Stella Artois: a tall chalice on a slim stem.
+  stella: {
+    outline: "M26,40 L74,40 C74,85 66,115 53,120 L53,180 C70,182 72,192 50,194 C28,192 30,182 47,180 L47,120 C34,115 26,85 26,40 Z",
+    bowl: "M29,42 L71,42 C71,84 64,112 50,116 C36,112 29,84 29,42 Z",
+    top: 42,
+    bottom: 116,
+  },
+  // Orval: a big round bowl on a short stem.
+  orval: {
+    outline: "M20,62 C14,90 16,130 46,142 L46,176 C30,178 28,192 50,194 C72,192 70,178 54,176 L54,142 C84,130 86,90 80,62 Z",
+    bowl: "M23,64 C17,90 19,126 50,138 C81,126 83,90 77,64 Z",
+    top: 64,
+    bottom: 138,
+  },
+  // Delirium Tremens: a tall stemmed tulip with a flared rim.
+  delirium: {
+    outline: "M30,22 C32,40 18,60 20,92 C22,120 40,130 47,134 L47,182 C32,184 30,193 50,195 C70,193 68,184 53,182 L53,134 C60,130 78,120 80,92 C82,60 68,40 70,22 Z",
+    bowl: "M32,24 C34,40 21,60 23,92 C25,118 40,127 50,128 C60,127 75,118 77,92 C79,60 66,40 68,24 Z",
+    top: 24,
+    bottom: 128,
+  },
+};

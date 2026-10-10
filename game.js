@@ -1,14 +1,31 @@
-// Fillle's rules: the day's cups, pouring and scoring. Everything here is
-// pure so it runs the same in the browser and in tests.
+// Fillle's rules: the day's patron, order, taps and glasses, pouring and
+// scoring. Everything here is pure so it runs the same in the browser and in
+// tests.
 
-export const CUPS = 5;
-export const TIME_LIMIT = 10; // seconds
-export const PERFECT_TIME = 8; // seconds of pouring to fill every cup exactly
-export const RIM = 1.25; // a cup holds 25% more than its line before spilling
-export const MIN_POUR = 0.5; // seconds; no cup fills faster than this
+import { PATRONS } from "./patrons.js";
+
+export const GLASSES = 5;
+export const TIME_LIMIT = 15; // seconds
+export const PERFECT_TIME = 8; // seconds of pouring to fill every glass exactly
+export const RIM = 1.25; // a glass holds 25% more than its line before spilling
+export const MIN_POUR = 0.5; // seconds; no glass fills faster than this
 export const MAX_POUR = 3.5; // seconds; or slower than this
-export const MIN_SPREAD = 3; // the slowest cup takes at least this many times as long as the fastest
+export const MIN_SPREAD = 2.5; // the slowest beer takes at least this many times as long as the fastest
 export const FIRST_DAY = "2026-10-10"; // Fillle #1
+
+// The beers on offer, each in its own glass. volume is the glass's relative
+// size: bigger glasses tend to take longer to fill.
+export const BEERS = [
+  { id: "duvel", name: "Duvel", label: "DUVEL", glass: "tulip", volume: 1.2, color: "#e8b53f", head: "#fffaf0", tap: "#ffffff", ink: "#c8102e" },
+  { id: "kwak", name: "Kwak", label: "KWAK", glass: "kwak", volume: 1.1, color: "#b4601c", head: "#f5e3c3", tap: "#6b3a1e", ink: "#f4d27a" },
+  { id: "chimay", name: "Chimay Blue", label: "CHIMAY", glass: "chalice", volume: 1.0, color: "#4a2410", head: "#e6d0a8", tap: "#1d3f8f", ink: "#f2d16b" },
+  { id: "hoegaarden", name: "Hoegaarden", label: "HOEGAARDEN", glass: "tumbler", volume: 1.3, color: "#f1e1a6", head: "#ffffff", tap: "#78b7e0", ink: "#ffffff" },
+  { id: "stella", name: "Stella Artois", label: "STELLA", glass: "stella", volume: 0.9, color: "#e5b13a", head: "#fffdf5", tap: "#9e1b32", ink: "#e5c06b" },
+  { id: "jupiler", name: "Jupiler", label: "JUPILER", glass: "pils", volume: 1.0, color: "#eec55c", head: "#ffffff", tap: "#d7262b", ink: "#ffffff" },
+  { id: "orval", name: "Orval", label: "ORVAL", glass: "orval", volume: 1.2, color: "#cf7d28", head: "#fbeed6", tap: "#0f5e73", ink: "#f6e7c1" },
+  { id: "delirium", name: "Delirium Tremens", label: "DELIRIUM", glass: "delirium", volume: 1.1, color: "#eccd66", head: "#ffffff", tap: "#f08bb4", ink: "#2a2a6a" },
+];
+export const beerById = Object.fromEntries(BEERS.map((b) => [b.id, b]));
 
 // mulberry32: a small, fast seeded PRNG.
 function mulberry32(seed) {
@@ -30,7 +47,16 @@ function hash(s) {
   return h >>> 0;
 }
 
-// dayKey is the UTC date of t as YYYY-MM-DD; everyone gets the same cups on
+function shuffle(arr, rand) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// dayKey is the UTC date of t as YYYY-MM-DD; everyone gets the same game on
 // the same UTC day.
 export function dayKey(t = new Date()) {
   return t.toISOString().slice(0, 10);
@@ -41,31 +67,56 @@ export function dayNumber(key) {
   return Math.round((Date.parse(key) - Date.parse(FIRST_DAY)) / 86400000) + 1;
 }
 
-// pourTimes returns how many seconds each cup takes to fill to its line on
-// the given day. They add up to PERFECT_TIME, each between MIN_POUR and
-// MAX_POUR, and they differ by at least MIN_SPREAD so every day has fast
-// and slow cups.
-export function pourTimes(key) {
+// dayGame builds a day's game: who orders, what they order, which taps are
+// on, the glasses on the bar (in order) and how long each takes to fill.
+export function dayGame(key) {
   const rand = mulberry32(hash("fillle:" + key));
+  const patron = Math.floor(rand() * PATRONS.length);
+
+  const kinds = rand() < 0.5 ? 2 : 3;
+  const splits = kinds === 2 ? [[3, 2], [4, 1]] : [[2, 2, 1], [3, 1, 1]];
+  const counts = splits[Math.floor(rand() * splits.length)];
+  const beers = shuffle(BEERS, rand);
+  const ordered = beers.slice(0, kinds);
+  const decoys = beers.slice(kinds, kinds + 2);
+  const order = ordered.map((b, i) => ({ beer: b.id, count: counts[i] }));
+  const glasses = shuffle(order.flatMap((o) => Array(o.count).fill(o.beer)), rand);
+  const taps = shuffle([...ordered, ...decoys], rand).map((b) => b.id);
+
+  // Each beer's glass gets a pour time; together the glasses take exactly
+  // PERFECT_TIME.
+  let beerTimes;
   for (;;) {
-    // Weights spread exponentially from 1 to 8, so a day mixes very fast and
-    // slow cups rather than clustering around the average.
-    const weights = Array.from({ length: CUPS }, () => Math.exp(Math.log(8) * rand()));
-    const total = weights.reduce((a, b) => a + b, 0);
-    const times = weights.map((w) => (PERFECT_TIME * w) / total);
+    const weights = Object.fromEntries(ordered.map((b) => [b.id, b.volume * Math.exp(Math.log(6) * rand())]));
+    const total = glasses.reduce((sum, id) => sum + weights[id], 0);
+    beerTimes = Object.fromEntries(ordered.map((b) => [b.id, (PERFECT_TIME * weights[b.id]) / total]));
+    const times = Object.values(beerTimes);
     const spread = Math.max(...times) / Math.min(...times);
-    if (spread >= MIN_SPREAD && times.every((t) => t >= MIN_POUR && t <= MAX_POUR)) {
-      // Round to milliseconds, putting any rounding error on the last cup so
-      // the total stays exact.
-      const rounded = times.map((t) => Math.round(t * 1000) / 1000);
-      const drift = PERFECT_TIME - rounded.reduce((a, b) => a + b, 0);
-      rounded[CUPS - 1] = Math.round((rounded[CUPS - 1] + drift) * 1000) / 1000;
-      return rounded;
-    }
+    if (spread >= MIN_SPREAD && times.every((t) => t >= MIN_POUR && t <= MAX_POUR)) break;
   }
+
+  return {
+    key,
+    number: dayNumber(key),
+    patron,
+    order,
+    taps,
+    glasses,
+    times: glasses.map((id) => beerTimes[id]),
+  };
 }
 
-// pour returns a cup's fill level (1 is the line) after pouring for seconds,
+const COUNT_WORDS = ["", "a", "two", "three", "four", "five"];
+
+// orderText is what the patron says, e.g. "Two Duvel, a Kwak and two Chimay
+// Blue, please."
+export function orderText(order) {
+  const parts = order.map((o) => `${COUNT_WORDS[o.count]} ${beerById[o.beer].name}`);
+  const list = parts.length > 1 ? parts.slice(0, -1).join(", ") + " and " + parts.at(-1) : parts[0];
+  return list.charAt(0).toUpperCase() + list.slice(1) + ", please.";
+}
+
+// pour returns a glass's fill level (1 is the line) after pouring for seconds,
 // starting from level. Past the rim it spills, so it never goes above RIM.
 export function pour(level, pourTime, seconds) {
   return Math.min(RIM, level + Math.max(0, seconds) / pourTime);
@@ -78,11 +129,30 @@ export function cupScore(level) {
   return Math.max(0, Math.round(100 * (1 - off / 0.5)));
 }
 
-export function totalScore(levels) {
-  return levels.reduce((sum, l) => sum + cupScore(l), 0);
+// A glass on the bar: which beer went in (null if empty), whether a second
+// beer went in too, and how full it is.
+export function emptyGlass() {
+  return { beer: null, mixed: false, level: 0 };
 }
 
-export function cupEmoji(score) {
+export function wrongBeer(glass, expected) {
+  return glass.beer !== null && (glass.beer !== expected || glass.mixed);
+}
+
+// glassScore is 0 for the wrong (or mixed) beer, otherwise how close to the
+// line it is.
+export function glassScore(glass, expected) {
+  if (glass.beer === null || wrongBeer(glass, expected)) return 0;
+  return cupScore(glass.level);
+}
+
+export function totalScore(glasses, expected) {
+  return glasses.reduce((sum, g, i) => sum + glassScore(g, expected[i]), 0);
+}
+
+export function glassEmoji(glass, expected) {
+  if (wrongBeer(glass, expected)) return "❌";
+  const score = glassScore(glass, expected);
   if (score >= 95) return "🟩";
   if (score >= 80) return "🟨";
   if (score >= 50) return "🟧";
@@ -90,16 +160,15 @@ export function cupEmoji(score) {
 }
 
 // shareText is the result players copy and share.
-export function shareText(key, levels, url) {
-  const scores = levels.map(cupScore);
+export function shareText(game, glasses, url) {
   return [
-    `Fillle #${dayNumber(key)} · ${totalScore(levels)}/${CUPS * 100}`,
-    scores.map(cupEmoji).join(""),
+    `Fillle #${game.number} · ${totalScore(glasses, game.glasses)}/${GLASSES * 100}`,
+    glasses.map((g, i) => glassEmoji(g, game.glasses[i])).join(""),
     url,
   ].join("\n");
 }
 
-// msUntilNextDay is how long until the next UTC day's cups.
+// msUntilNextDay is how long until the next UTC day's game.
 export function msUntilNextDay(now = new Date()) {
   const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
   return next - now.getTime();

@@ -8,8 +8,7 @@
   --ring: rgba(27, 26, 23, 0.12);
   --glass: rgba(27, 26, 23, 0.55);
   --glass-fill: rgba(27, 26, 23, 0.03);
-  --water: #3b8fe0;
-  --water-top: #6fb0ee;
+  --wood: #8a5a33;
   --line: #e2553b;
   --good: #1f9d55;
   --ok: #d39a00;
@@ -29,8 +28,7 @@
     --ring: rgba(255, 255, 255, 0.12);
     --glass: rgba(242, 240, 234, 0.6);
     --glass-fill: rgba(242, 240, 234, 0.04);
-    --water: #4a9bea;
-    --water-top: #84bdf2;
+    --wood: #6e4526;
     --line: #f0705a;
     --button: #f2f0ea;
     --button-ink: #121210;
@@ -69,41 +67,98 @@ h1 { font-size: 34px; line-height: 1; margin: 0; letter-spacing: -0.03em; font-w
 .timer.low .track .fill { background: var(--bad); }
 .hint { color: var(--ink-2); font-size: 14px; margin: 12px 0 0; min-height: 21px; }
 
-.cups {
-  display: flex; justify-content: center; gap: clamp(4px, 2vw, 14px);
-  margin: 16px 0 8px; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+/* The patron and their order */
+.bar-scene { display: flex; align-items: center; gap: 12px; margin: 20px 0 0; min-height: 150px; }
+.patron { margin: 0; flex: none; text-align: center; animation: walk-in 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.patron pre { margin: 0; font: 13px/1.15 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--ink); }
+.patron figcaption { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.bubble {
+  position: relative; flex: 1; background: var(--surface); border-radius: 16px; padding: 14px 16px;
+  box-shadow: 0 0 0 1px var(--ring); animation: pop 0.35s 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
 }
-.cup {
-  flex: 0 1 88px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+.bubble::before {
+  content: ""; position: absolute; left: -8px; top: 50%; width: 16px; height: 16px; margin-top: -8px;
+  background: var(--surface); box-shadow: -1px 1px 0 0 var(--ring); transform: rotate(45deg);
+}
+.bubble p { margin: 0; font-size: 17px; font-weight: 600; position: relative; }
+@keyframes walk-in { from { transform: translateX(80px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Taps */
+.taps { display: flex; justify-content: center; gap: clamp(6px, 3vw, 20px); margin: 4px 0 0; }
+.tap {
+  flex: 0 1 64px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  border: 0; background: none; padding: 4px 0; color: inherit; border-radius: 12px;
+  animation: rise 0.45s calc(0.9s + var(--delay, 0ms)) cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.tap svg { width: 100%; max-width: 54px; height: auto; display: block; overflow: visible; }
+.tap .tap-body { fill: #b9b6ad; stroke: #8d897e; stroke-width: 1.5; }
+.tap .handle { transform-origin: 30px 96px; transition: transform 0.15s; }
+.tap .handle-face { stroke: rgba(0, 0, 0, 0.25); stroke-width: 1.5; }
+.tap text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 800; letter-spacing: 0.04em; }
+.tap .mini path { fill: none; stroke: var(--ink-2); stroke-width: 7; }
+.tap .name { font-size: 11px; color: var(--ink-2); line-height: 1.2; text-align: center; min-height: 26px; }
+.tap.selected { background: var(--surface); box-shadow: 0 0 0 2px var(--ink); }
+.tap.selected .handle { transform: rotate(-16deg); }
+.tap:not([disabled]):hover .handle-face { filter: brightness(1.08); }
+.tap:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.tap[disabled] { cursor: default; opacity: 0.6; }
+.taps.nudge { animation: nudge 0.35s; }
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes nudge { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* Glasses */
+.glasses {
+  --gap: clamp(2px, 1.5vw, 12px);
+  display: flex; justify-content: center; align-items: flex-start; gap: var(--gap);
+  margin: 12px 0 8px; padding-bottom: 6px; position: relative;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.glass {
+  flex: 0 1 92px; display: flex; flex-direction: column; align-items: center; gap: 6px;
   border: 0; background: none; padding: 0; color: inherit; touch-action: none; outline: none;
 }
-.cup svg { width: 100%; height: auto; display: block; overflow: visible; }
-.cup .glass { fill: var(--glass-fill); stroke: var(--glass); stroke-width: 2.5; stroke-linejoin: round; }
-.cup .water { fill: var(--water); }
-.cup .surface { fill: var(--water-top); }
-.cup .line { stroke: var(--line); stroke-width: 2.5; stroke-linecap: round; }
-.cup .tick { fill: var(--line); }
-.cup .stream { fill: var(--water); opacity: 0; transition: opacity 80ms; }
-.cup.pouring .stream { opacity: 1; }
-.cup .drip { fill: var(--water); opacity: 0; }
-.cup.spilled .drip { opacity: 1; animation: drip 0.6s linear infinite; }
-.cup.spilled .glass { stroke: var(--bad); }
-.cup:not([disabled]):hover .glass { stroke: var(--ink); }
-.cup:focus-visible .glass { stroke: var(--ink); stroke-width: 3.5; }
-.cup[disabled] { cursor: default; }
+/* Each glass's wood strip reaches into the gaps either side, so the bar top
+   runs unbroken under all of them. */
+.glass svg {
+  width: 100%; height: auto; display: block; overflow: visible; box-sizing: content-box;
+  padding: 0 calc(var(--gap) / 2); margin: 0 calc(var(--gap) / -2); border-bottom: 8px solid var(--wood);
+}
+
+.glass .outline { fill: var(--glass-fill); stroke: var(--glass); stroke-width: 2.5; stroke-linejoin: round; }
+.glass .facets { fill: none; stroke: var(--glass); stroke-width: 1; opacity: 0.5; }
+.glass .stand { fill: none; stroke: var(--wood); stroke-width: 5; stroke-linecap: round; }
+.glass .line { stroke: var(--line); stroke-width: 2.5; stroke-linecap: round; }
+.glass .stream { opacity: 0; transition: opacity 80ms; }
+.glass.pouring .stream { opacity: 1; }
+.glass .drip { fill: var(--line); opacity: 0; }
+.glass.spilled .drip { opacity: 1; animation: drip 0.6s linear infinite; }
+.glass.spilled .outline { stroke: var(--bad); }
+.glass:not([disabled]):hover .outline { stroke: var(--ink); }
+.glass:focus-visible .outline { stroke: var(--ink); stroke-width: 3.5; }
+.glass[disabled] { cursor: default; }
 @keyframes drip { from { transform: translateY(0); } to { transform: translateY(14px); opacity: 0; } }
 
-.cup .key {
+.glass .key, .tap .key {
   font-size: 13px; font-weight: 700; color: var(--ink-2); min-width: 26px; height: 26px; line-height: 24px;
   border-radius: 6px; box-shadow: 0 0 0 1px var(--ring); background: var(--surface); text-align: center;
 }
-.cup .out { text-align: center; line-height: 1.2; min-height: 34px; }
-.cup .pct { display: block; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.cup .pts { display: block; font-weight: 700; font-variant-numeric: tabular-nums; }
-.cup .pts.good { color: var(--good); }
-.cup .pts.ok { color: var(--ok); }
-.cup .pts.meh { color: var(--meh); }
-.cup .pts.bad { color: var(--bad); }
+.glass .out { text-align: center; line-height: 1.2; min-height: 34px; }
+.glass .pct, .glass .beer-name { display: block; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.glass .beer-name { color: var(--muted); font-size: 11px; }
+.glass .pts { display: block; font-weight: 700; font-variant-numeric: tabular-nums; }
+.glass .pts.good { color: var(--good); }
+.glass .pts.ok { color: var(--ok); }
+.glass .pts.meh { color: var(--meh); }
+.glass .pts.bad { color: var(--bad); }
+
+body.served .patron, body.served .bubble, body.served .tap { animation: none; }
+@media (max-width: 480px) {
+  .bar-scene { gap: 8px; }
+  .patron pre { font-size: 10px; }
+  .bubble p { font-size: 15px; }
+  .tap .name { display: none; }
+}
 
 .actions { text-align: center; min-height: 44px; }
 .primary, .secondary {
@@ -140,5 +195,5 @@ dialog strong { color: var(--ink); }
 dialog form { text-align: right; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cup.spilled .drip { animation: none; }
+  .glass.spilled .drip, .patron, .bubble, .tap, .taps.nudge { animation: none; }
 }
