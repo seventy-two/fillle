@@ -94,14 +94,11 @@ function buildGlass(i) {
   el.setAttribute("aria-label", `Glass ${i + 1}`);
   el.innerHTML = `
     <svg viewBox="0 -44 100 244" aria-hidden="true">
-      <defs><clipPath id="bowl-${i}"><path d="${shape.bowl}"/></clipPath></defs>
       <rect class="stream" x="48" y="-44" width="4" height="0" rx="2"/>
       ${shape.stand ? `<path class="stand" d="${shape.stand}"/>` : ""}
       <path class="outline" d="${shape.outline}"/>
-      <g clip-path="url(#bowl-${i})">
-        <rect class="beer" x="0" width="100" y="${shape.bottom}" height="0"/>
-        <rect class="head" x="0" width="100" y="${shape.bottom}" height="0"/>
-      </g>
+      <path class="beer" d=""/>
+      <path class="head" d=""/>
       ${shape.facets ? `<path class="facets" d="${shape.facets}"/>` : ""}
       <path class="line" d="M10,${lineY} L90,${lineY}"/>
       <rect class="drip" x="4" y="186" width="5" height="10" rx="2.5"/>
@@ -111,6 +108,7 @@ function buildGlass(i) {
     <span class="out"></span>`;
   glassEls.push({
     el, shape,
+    bowl: bowlPolygon(shape.bowl, el.querySelector("svg")),
     beer: el.querySelector(".beer"),
     head: el.querySelector(".head"),
     stream: el.querySelector(".stream"),
@@ -129,6 +127,47 @@ function buildGlass(i) {
   el.addEventListener("lostpointercapture", release);
   el.addEventListener("contextmenu", (e) => e.preventDefault());
   return el;
+}
+
+// bowlPolygon samples a glass's bowl outline into points, so the beer can be
+// drawn as a plain shape cut from it. (Clipping a rectangle to the bowl
+// instead didn't always repaint in Firefox while pouring.)
+function bowlPolygon(d, svg) {
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", d);
+  svg.append(path); // measured in place: some browsers won't measure a detached path
+  const length = path.getTotalLength();
+  const steps = 160;
+  const points = Array.from({ length: steps }, (_, k) => {
+    const p = path.getPointAtLength((length * k) / steps);
+    return [p.x, p.y];
+  });
+  path.remove();
+  return points;
+}
+
+// cutPolygon keeps the part of a polygon between two heights
+// (Sutherland–Hodgman against each edge in turn).
+function cutPolygon(points, top, bottom) {
+  const clip = (pts, inside, cross) => {
+    const out = [];
+    for (let k = 0; k < pts.length; k++) {
+      const a = pts[k], b = pts[(k + 1) % pts.length];
+      const ina = inside(a), inb = inside(b);
+      if (ina) out.push(a);
+      if (ina !== inb) {
+        const t = (cross - a[1]) / (b[1] - a[1]);
+        out.push([a[0] + t * (b[0] - a[0]), cross]);
+      }
+    }
+    return out;
+  };
+  return clip(clip(points, (p) => p[1] >= top, top), (p) => p[1] <= bottom, bottom);
+}
+
+function polygonPath(points) {
+  if (points.length < 3) return "";
+  return "M" + points.map((p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`).join("L") + "Z";
 }
 
 // --- Playing
@@ -220,15 +259,15 @@ function currentLevel(i, now) {
 function draw(now) {
   for (let i = 0; i < GLASSES; i++) {
     const g = state.glasses[i];
-    const { shape, beer, head, el } = glassEls[i];
+    const { shape, bowl, beer, head, el } = glassEls[i];
     const level = currentLevel(i, now);
     const y = shape.bottom - (Math.min(level, RIM) / RIM) * (shape.bottom - shape.top);
     const info = g.beer && beerById[g.beer];
-    beer.setAttribute("y", y);
-    beer.setAttribute("height", shape.bottom - y);
+    const beerShape = level > 0 ? polygonPath(cutPolygon(bowl, y, Infinity)) : "";
+    if (beer.getAttribute("d") !== beerShape) beer.setAttribute("d", beerShape);
     beer.style.fill = g.mixed ? MIXED_COLOR : info ? info.color : "transparent";
-    head.setAttribute("y", y);
-    head.setAttribute("height", level > 0.04 ? 5 : 0);
+    const headShape = level > 0.04 ? polygonPath(cutPolygon(bowl, y, y + 5)) : "";
+    if (head.getAttribute("d") !== headShape) head.setAttribute("d", headShape);
     head.style.fill = g.mixed ? "#cdbb9f" : info ? info.head : "transparent";
     // The stream runs down to the beer, narrower than any glass's neck so the
     // surface stays visible either side of it.
