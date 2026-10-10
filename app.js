@@ -93,7 +93,7 @@ function buildGlass(i) {
   el.innerHTML = `
     <svg viewBox="0 -44 100 244" aria-hidden="true">
       <defs><clipPath id="bowl-${i}"><path d="${shape.bowl}"/></clipPath></defs>
-      <rect class="stream" x="46" y="-44" width="8" height="0" rx="4"/>
+      <rect class="stream" x="47.5" y="-44" width="5" height="${shape.top + 44}" rx="2.5"/>
       ${shape.stand ? `<path class="stand" d="${shape.stand}"/>` : ""}
       <path class="outline" d="${shape.outline}"/>
       <g clip-path="url(#bowl-${i})">
@@ -191,7 +191,6 @@ function draw(now) {
     head.setAttribute("y", y);
     head.setAttribute("height", level > 0.04 ? 5 : 0);
     head.style.fill = g.mixed ? "#cdbb9f" : info ? info.head : "transparent";
-    glassEls[i].stream.setAttribute("height", Math.max(0, y + 44));
     el.classList.toggle("spilled", level >= RIM);
   }
   const left = state.started ? Math.max(0, state.endAt - now) / 1000 : TIME_LIMIT;
