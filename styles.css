@@ -1,0 +1,144 @@
+:root {
+  color-scheme: light;
+  --page: #f6f4ef;
+  --surface: #fffdf9;
+  --ink: #1b1a17;
+  --ink-2: #57544c;
+  --muted: #8d897e;
+  --ring: rgba(27, 26, 23, 0.12);
+  --glass: rgba(27, 26, 23, 0.55);
+  --glass-fill: rgba(27, 26, 23, 0.03);
+  --water: #3b8fe0;
+  --water-top: #6fb0ee;
+  --line: #e2553b;
+  --good: #1f9d55;
+  --ok: #d39a00;
+  --meh: #e5772e;
+  --bad: #d23f3f;
+  --button: #1b1a17;
+  --button-ink: #fffdf9;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #121210;
+    --surface: #1c1b19;
+    --ink: #f2f0ea;
+    --ink-2: #c6c2b8;
+    --muted: #8d897e;
+    --ring: rgba(255, 255, 255, 0.12);
+    --glass: rgba(242, 240, 234, 0.6);
+    --glass-fill: rgba(242, 240, 234, 0.04);
+    --water: #4a9bea;
+    --water-top: #84bdf2;
+    --line: #f0705a;
+    --button: #f2f0ea;
+    --button-ink: #121210;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: max(24px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+}
+button { font: inherit; cursor: pointer; }
+
+header { display: flex; justify-content: space-between; align-items: flex-start; }
+h1 { font-size: 34px; line-height: 1; margin: 0; letter-spacing: -0.03em; font-weight: 800; }
+.sub { margin: 6px 0 0; color: var(--ink-2); font-size: 14px; }
+.icon {
+  width: 36px; height: 36px; border-radius: 50%; border: 0;
+  background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--ring); font-weight: 700;
+}
+
+.timer { margin: 28px 0 8px; text-align: center; }
+.clock { font-size: 56px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.clock small { font-size: 22px; color: var(--muted); margin-left: 2px; font-weight: 600; }
+.timer.low .clock { color: var(--bad); }
+.track { height: 6px; border-radius: 3px; background: var(--ring); margin: 14px auto 0; max-width: 320px; overflow: hidden; }
+.track .fill { height: 100%; width: 100%; background: var(--ink); border-radius: 3px; transform-origin: left; }
+.timer.low .track .fill { background: var(--bad); }
+.hint { color: var(--ink-2); font-size: 14px; margin: 12px 0 0; min-height: 21px; }
+
+.cups {
+  display: flex; justify-content: center; gap: clamp(4px, 2vw, 14px);
+  margin: 16px 0 8px; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.cup {
+  flex: 0 1 88px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  border: 0; background: none; padding: 0; color: inherit; touch-action: none; outline: none;
+}
+.cup svg { width: 100%; height: auto; display: block; overflow: visible; }
+.cup .glass { fill: var(--glass-fill); stroke: var(--glass); stroke-width: 2.5; stroke-linejoin: round; }
+.cup .water { fill: var(--water); }
+.cup .surface { fill: var(--water-top); }
+.cup .line { stroke: var(--line); stroke-width: 2.5; stroke-linecap: round; }
+.cup .tick { fill: var(--line); }
+.cup .stream { fill: var(--water); opacity: 0; transition: opacity 80ms; }
+.cup.pouring .stream { opacity: 1; }
+.cup .drip { fill: var(--water); opacity: 0; }
+.cup.spilled .drip { opacity: 1; animation: drip 0.6s linear infinite; }
+.cup.spilled .glass { stroke: var(--bad); }
+.cup:not([disabled]):hover .glass { stroke: var(--ink); }
+.cup:focus-visible .glass { stroke: var(--ink); stroke-width: 3.5; }
+.cup[disabled] { cursor: default; }
+@keyframes drip { from { transform: translateY(0); } to { transform: translateY(14px); opacity: 0; } }
+
+.cup .key {
+  font-size: 13px; font-weight: 700; color: var(--ink-2); min-width: 26px; height: 26px; line-height: 24px;
+  border-radius: 6px; box-shadow: 0 0 0 1px var(--ring); background: var(--surface); text-align: center;
+}
+.cup .out { text-align: center; line-height: 1.2; min-height: 34px; }
+.cup .pct { display: block; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cup .pts { display: block; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cup .pts.good { color: var(--good); }
+.cup .pts.ok { color: var(--ok); }
+.cup .pts.meh { color: var(--meh); }
+.cup .pts.bad { color: var(--bad); }
+
+.actions { text-align: center; min-height: 44px; }
+.primary, .secondary {
+  border: 0; border-radius: 999px; padding: 10px 24px; font-weight: 700;
+}
+.primary { background: var(--button); color: var(--button-ink); }
+.secondary { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--ring); }
+
+.result {
+  background: var(--surface); border-radius: 18px; box-shadow: 0 0 0 1px var(--ring);
+  padding: 24px 20px; text-align: center; margin-top: 8px;
+}
+.score { font-size: 52px; font-weight: 800; margin: 0; line-height: 1; letter-spacing: -0.02em; }
+.score small { font-size: 20px; color: var(--muted); font-weight: 600; }
+.squares { font-size: 28px; letter-spacing: 4px; margin: 12px 0 4px; }
+.verdict { color: var(--ink-2); margin: 0 0 16px; }
+.toast { color: var(--ink-2); font-size: 14px; min-height: 21px; margin: 8px 0 0; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0 0; }
+.stats div { padding: 8px 0; }
+.stats dt { color: var(--muted); font-size: 12px; }
+.stats dd { margin: 0; font-size: 20px; font-weight: 700; }
+.next { color: var(--muted); font-size: 14px; margin: 12px 0 0; }
+.next span { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+dialog {
+  border: 0; border-radius: 18px; padding: 24px; max-width: min(440px, calc(100vw - 32px));
+  background: var(--surface); color: var(--ink); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
+dialog h2 { margin: 0 0 8px; font-size: 22px; }
+dialog ol { padding-left: 20px; margin: 0 0 20px; color: var(--ink-2); }
+dialog li { margin-bottom: 8px; }
+dialog strong { color: var(--ink); }
+dialog form { text-align: right; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cup.spilled .drip { animation: none; }
+}
