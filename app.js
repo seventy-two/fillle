@@ -1,5 +1,5 @@
 import {
-  GLASSES, TIME_LIMIT, RIM, beerById,
+  GLASSES, TIME_LIMIT, READY_TIME, RIM, beerById,
   dayKey, dayGame, orderText, pour, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji, shareText,
   msUntilNextDay, updateStats,
 } from "./game.js";
@@ -31,7 +31,9 @@ const state = {
   tap: null, // index into GAME.taps
   started: false,
   finished: false,
-  endAt: 0,
+  startsAt: 0, // Date.now() time the clock starts by itself, once the order's given
+  endAt: 0, // performance.now() time the clock runs out
+  endEpoch: 0, // the same, as a Date.now() time, so a reload can carry on
   pouring: null, // { glass, beer, since }
 };
 const glassEls = [];
@@ -93,7 +95,7 @@ function buildGlass(i) {
   el.innerHTML = `
     <svg viewBox="0 -44 100 244" aria-hidden="true">
       <defs><clipPath id="bowl-${i}"><path d="${shape.bowl}"/></clipPath></defs>
-      <rect class="stream" x="47.5" y="-44" width="5" height="${shape.top + 44}" rx="2.5"/>
+      <rect class="stream" x="48" y="-44" width="4" height="0" rx="2"/>
       ${shape.stand ? `<path class="stand" d="${shape.stand}"/>` : ""}
       <path class="outline" d="${shape.outline}"/>
       <g clip-path="url(#bowl-${i})">
@@ -135,8 +137,45 @@ function start(t) {
   if (state.started) return;
   state.started = true;
   state.endAt = t + TIME_LIMIT * 1000;
+  state.endEpoch = Date.now() + (state.endAt - performance.now());
   $("done").hidden = false;
+  setHint(state.tap === null ? "Go! Pick a tap and pour" : "");
   save();
+}
+
+function setHint(text, ready = false) {
+  const hint = $("hint");
+  if (hint.textContent !== text) hint.textContent = text;
+  hint.classList.toggle("ready", ready);
+}
+
+// --- The patron's order
+
+// talk types the order into the speech bubble as if the patron is mid-sentence,
+// then gives the player READY_TIME seconds before the clock starts by itself.
+function talk() {
+  const text = orderText(GAME.order);
+  const bubble = $("bubble-text");
+  const done = () => {
+    bubble.parentElement.classList.remove("typing");
+    if (!state.started && !state.finished) {
+      state.startsAt = Date.now() + READY_TIME * 1000;
+      save();
+    }
+  };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    bubble.textContent = text;
+    return done();
+  }
+  bubble.textContent = "";
+  bubble.parentElement.classList.add("typing");
+  let n = 0;
+  const next = () => {
+    bubble.textContent = text.slice(0, ++n);
+    if (n >= text.length) return done();
+    setTimeout(next, /[,.]/.test(text[n - 1]) ? 220 : 32);
+  };
+  setTimeout(next, 800); // once the patron has walked up
 }
 
 function startPour(i, t) {
@@ -191,6 +230,9 @@ function draw(now) {
     head.setAttribute("y", y);
     head.setAttribute("height", level > 0.04 ? 5 : 0);
     head.style.fill = g.mixed ? "#cdbb9f" : info ? info.head : "transparent";
+    // The stream runs down to the beer, narrower than any glass's neck so the
+    // surface stays visible either side of it.
+    glassEls[i].stream.setAttribute("height", Math.max(0, y + 44));
     el.classList.toggle("spilled", level >= RIM);
   }
   const left = state.started ? Math.max(0, state.endAt - now) / 1000 : TIME_LIMIT;
@@ -201,6 +243,11 @@ function draw(now) {
 
 function tick() {
   const now = performance.now();
+  if (!state.started && state.startsAt) {
+    const left = state.startsAt - Date.now();
+    if (left <= 0) start(now);
+    else setHint(`Pouring starts in ${Math.ceil(left / 1000)}`, true);
+  }
   if (state.started && !state.finished && now >= state.endAt) {
     stopPour(state.endAt);
     finish();
@@ -210,7 +257,13 @@ function tick() {
 }
 
 function save() {
-  store.set(DAY_STORE, { glasses: state.glasses, started: state.started, finished: state.finished });
+  store.set(DAY_STORE, {
+    glasses: state.glasses,
+    started: state.started,
+    finished: state.finished,
+    startsAt: state.startsAt,
+    endEpoch: state.endEpoch,
+  });
 }
 
 function finish() {
@@ -307,14 +360,16 @@ function init() {
   $("day").textContent = `#${GAME.number} · ${label}`;
   $("patron-art").textContent = PATRON.art;
   $("patron-name").textContent = PATRON.name;
-  $("bubble-text").textContent = orderText(GAME.order);
   GAME.taps.forEach((_, i) => $("taps").append(buildTap(i)));
   GAME.glasses.forEach((_, i) => $("glasses").append(buildGlass(i)));
 
   $("done").addEventListener("click", finish);
   $("share").addEventListener("click", share);
   $("help-open").addEventListener("click", () => $("help").showModal());
-  $("help").addEventListener("close", () => store.set(HELP_STORE, true));
+  $("help").addEventListener("close", () => {
+    store.set(HELP_STORE, true);
+    if (!introBegun) beginIntro();
+  });
 
   addEventListener("keydown", (e) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -332,23 +387,54 @@ function init() {
   // Don't keep pouring if the window loses focus mid-pour.
   addEventListener("blur", () => stopPour(performance.now()));
 
-  // One go a day: a game started earlier today counts as it was left.
-  const saved = store.get(DAY_STORE);
-  if (saved?.started && Array.isArray(saved.glasses)) {
-    state.glasses = saved.glasses.map((g) => ({ ...emptyGlass(), ...g }));
-    state.started = true;
-    document.body.classList.add("served");
-    if (saved.finished) {
-      state.finished = true;
-      showResult();
-    } else {
-      finish();
-    }
-    return;
-  }
-
-  if (!store.get(HELP_STORE)) $("help").showModal();
+  if (restore()) return;
+  if (store.get(HELP_STORE)) beginIntro();
+  else $("help").showModal(); // the patron starts talking once it's closed
   requestAnimationFrame(tick);
+}
+
+let introBegun = false;
+function beginIntro() {
+  introBegun = true;
+  setHint("");
+  talk();
+}
+
+// restore picks up today's game where it was left. Its deadlines are real
+// times, so reloading can't buy more time to plan or pour: a countdown or
+// clock that ran out while away has run out. It reports whether there was a
+// game to pick up.
+function restore() {
+  const saved = store.get(DAY_STORE);
+  if (!saved || !Array.isArray(saved.glasses)) return false;
+  if (!saved.finished && !saved.started && !saved.startsAt) return false; // the order hadn't been given yet
+  state.glasses = saved.glasses.map((g) => ({ ...emptyGlass(), ...g }));
+  introBegun = true;
+  document.body.classList.add("served");
+  $("bubble-text").textContent = orderText(GAME.order);
+  if (saved.finished) {
+    state.started = state.finished = true;
+    showResult();
+    return true;
+  }
+  const now = Date.now();
+  const clockStarted = saved.started || (saved.startsAt && now >= saved.startsAt);
+  const endEpoch = saved.endEpoch || (saved.startsAt ? saved.startsAt + TIME_LIMIT * 1000 : 0);
+  if (clockStarted) {
+    state.started = true;
+    if (!endEpoch || now >= endEpoch) {
+      finish();
+      return true;
+    }
+    state.endEpoch = endEpoch;
+    state.endAt = performance.now() + (endEpoch - now);
+    $("done").hidden = false;
+    setHint("");
+  } else {
+    state.startsAt = saved.startsAt;
+  }
+  requestAnimationFrame(tick);
+  return true;
 }
 
 init();

@@ -26,13 +26,14 @@ export const GLASS_SHAPES = {
     top: 42,
     bottom: 136,
   },
-  // Kwak: a round bulb on a long neck, held in a wooden stand.
+  // Kwak: a round bulb on a neck, held in a wooden stand. The neck is wider
+  // than the real glass's so the beer stays visible on small screens.
   kwak: {
-    outline: "M34,10 L66,10 C60,30 56,45 56,60 L56,120 C78,128 80,170 50,176 C20,170 22,128 44,120 L44,60 C44,45 40,30 34,10 Z",
-    bowl: "M36.5,12 L63.5,12 C58,30 54,45 54,60 L54,122 C74,130 76,168 50,173 C24,168 26,130 46,122 L46,60 C46,45 42,30 36.5,12 Z",
-    stand: "M22,146 L22,196 M78,146 L78,196 M18,196 L82,196 M22,150 L78,150",
+    outline: "M30,10 L70,10 C64,30 61,45 61,60 L61,118 C82,126 84,172 50,178 C16,172 18,126 39,118 L39,60 C39,45 36,30 30,10 Z",
+    bowl: "M32.5,12 L67.5,12 C62,30 59,45 59,60 L59,120 C78,128 80,169 50,175 C20,169 22,128 41,120 L41,60 C41,45 38,30 32.5,12 Z",
+    stand: "M12,140 L12,196 M88,140 L88,196 M8,196 L92,196 M12,146 L88,146",
     top: 12,
-    bottom: 173,
+    bottom: 175,
   },
   // Chimay: a wide, shallow chalice on a thick stem.
   chalice: {

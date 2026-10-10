@@ -66,6 +66,7 @@ h1 { font-size: 34px; line-height: 1; margin: 0; letter-spacing: -0.03em; font-w
 .track .fill { height: 100%; width: 100%; background: var(--ink); border-radius: 3px; transform-origin: left; }
 .timer.low .track .fill { background: var(--bad); }
 .hint { color: var(--ink-2); font-size: 14px; margin: 12px 0 0; min-height: 21px; }
+.hint.ready { color: var(--ink); font-weight: 700; font-size: 16px; }
 
 /* The patron and their order */
 .bar-scene { display: flex; align-items: center; gap: 12px; margin: 20px 0 0; min-height: 150px; }
@@ -80,7 +81,12 @@ h1 { font-size: 34px; line-height: 1; margin: 0; letter-spacing: -0.03em; font-w
   content: ""; position: absolute; left: -8px; top: 50%; width: 16px; height: 16px; margin-top: -8px;
   background: var(--surface); box-shadow: -1px 1px 0 0 var(--ring); transform: rotate(45deg);
 }
-.bubble p { margin: 0; font-size: 17px; font-weight: 600; position: relative; }
+.bubble p { margin: 0; font-size: 17px; font-weight: 600; position: relative; min-height: 3em; }
+.bubble.typing p::after {
+  content: ""; display: inline-block; width: 2px; height: 1.1em; margin-left: 2px; vertical-align: -0.15em;
+  background: var(--ink); animation: caret 0.8s steps(1) infinite;
+}
+@keyframes caret { 50% { opacity: 0; } }
 @keyframes walk-in { from { transform: translateX(80px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: none; opacity: 1; } }
 

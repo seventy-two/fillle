@@ -12,14 +12,16 @@ pour each one into its glass, stopping at the line, within 15 seconds.
 - The bar has more taps than the order needs, so some are decoys.
 - Each beer pours at its own speed. The patron, order and speeds change every
   UTC day and are the same for everyone that day.
+- The patron types out their order. Once they've finished you get 10 seconds
+  to get ready before the clock starts by itself (or pick a tap or pour to
+  start it sooner), so there's only so long to plan.
 - Pouring every glass exactly to its line takes 8 seconds, leaving 7 of the 15
-  for picking taps and moving between glasses. The clock starts at your first
-  tap or pour, so reading the order is free.
+  for picking taps and moving between glasses.
 - Each glass scores up to 100, losing 2 points for every 1% over or under the
   line. The wrong beer, or two beers in one glass, scores 0. Past the rim
   (125% of the line) it spills.
-- One go a day, kept in the browser. Reloading mid-game finishes the game as
-  it was left.
+- One go a day, kept in the browser. The countdown and clock run on real
+  time, so reloading carries on where you were rather than buying more time.
 
 Tap handles use each brewery's colours and name; they're not the breweries'
 logos.
