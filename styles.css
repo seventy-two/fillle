@@ -59,7 +59,9 @@ h1 { font-size: 34px; line-height: 1; margin: 0; letter-spacing: -0.03em; font-w
   background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--ring); font-weight: 700;
 }
 
-.timer { margin: 28px 0 8px; text-align: center; }
+.timer { margin: 28px 0 8px; text-align: center; position: relative; }
+/* Done sits beside the clock so it never needs a scroll past the glasses. */
+.timer #done { position: absolute; right: 0; top: 8px; }
 .clock { font-size: 56px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .clock small { font-size: 22px; color: var(--muted); margin-left: 2px; font-weight: 600; }
 .timer.low .clock { color: var(--bad); }
@@ -126,6 +128,8 @@ h1 { font-size: 34px; line-height: 1; margin: 0; letter-spacing: -0.03em; font-w
   flex: 0 1 92px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;
   border: 0; background: none; padding: 0; color: inherit; touch-action: none; outline: none;
 }
+/* Once the round's over, a finger on a glass scrolls the page like anywhere else. */
+.glass[disabled] { touch-action: auto; }
 /* Each glass's wood strip reaches into the gaps either side, so the bar top
    runs unbroken under all of them. */
 .glass svg {
@@ -166,9 +170,26 @@ body.served .patron, body.served .bubble, body.served .tap { animation: none; }
   .patron pre { font-size: 10px; }
   .bubble p { font-size: 15px; }
   .tap .name { display: none; }
+  main { padding-top: max(14px, env(safe-area-inset-top)); }
+  h1 { font-size: 28px; }
+  .sub { margin-top: 4px; font-size: 13px; }
+  .bar-scene { margin-top: 10px; min-height: 0; }
+  .patron pre { font-size: 9px; }
+  .bubble { padding: 10px 14px; }
+  .timer { margin: 12px 0 4px; }
+  .clock { font-size: 44px; }
+  .clock small { font-size: 18px; }
+  .track { margin-top: 10px; }
+  .hint { margin-top: 8px; }
+  .timer #done { top: 2px; padding: 8px 18px; }
+  .glasses { margin-top: 4px; }
+  .glass .out:empty { display: none; }
+}
+/* Touch screens have no keyboard to press 1–5 or Q–T on. */
+@media (hover: none) and (pointer: coarse) {
+  .glass .key, .tap .key { display: none; }
 }
 
-.actions { text-align: center; min-height: 44px; }
 .primary, .secondary {
   border: 0; border-radius: 999px; padding: 10px 24px; font-weight: 700;
 }

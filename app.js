@@ -16,6 +16,7 @@ const SHARE_URL = location.origin + location.pathname;
 const TAP_KEYS = "qwert";
 const MIXED_COLOR = "#7a6248";
 const MIXED_HEAD = "#cdbb9f";
+const HANDLE_TEXT = 80; // the most a tap label can run along its handle, in SVG units
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -44,19 +45,29 @@ const tapEls = [];
 
 function tapSVG(beer) {
   const shape = GLASS_SHAPES[beer.glass];
-  const size = beer.label.length > 8 ? 8 : beer.label.length > 6 ? 10 : 12;
   return `
     <svg viewBox="0 0 60 176" aria-hidden="true">
       <rect class="tap-body" x="22" y="96" width="16" height="30" rx="3"/>
       <path class="tap-body" d="M26,126 L34,126 L33,142 L27,142 Z"/>
       <g class="handle">
         <rect x="10" y="4" width="40" height="92" rx="12" fill="${beer.tap}" class="handle-face"/>
-        <text x="30" y="50" fill="${beer.ink}" font-size="${size}" transform="rotate(-90 30 50)" text-anchor="middle" dominant-baseline="central">${beer.label}</text>
+        <text x="30" y="50" fill="${beer.ink}" font-size="13" transform="rotate(-90 30 50)" text-anchor="middle" dominant-baseline="central">${beer.label}</text>
       </g>
       <g transform="translate(19 128) scale(0.22)" class="mini">
         <path d="${shape.outline}"/>
       </g>
     </svg>`;
+}
+
+// fitLabels squeezes any tap label too long for its handle to fit, rather
+// than shrinking it, so long names stay as tall and readable as short ones.
+function fitLabels() {
+  for (const text of document.querySelectorAll(".tap text")) {
+    if (text.getComputedTextLength() > HANDLE_TEXT) {
+      text.setAttribute("textLength", HANDLE_TEXT);
+      text.setAttribute("lengthAdjust", "spacingAndGlyphs");
+    }
+  }
 }
 
 function buildTap(i) {
@@ -407,6 +418,7 @@ function showResult(stats) {
   $("st-best").textContent = s.best ?? total;
   $("st-avg").textContent = s.played ? Math.round(s.total / s.played) : total;
   $("result").hidden = false;
+  if (stats) $("result").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
   countdown();
   setInterval(countdown, 1000);
 }
@@ -445,6 +457,7 @@ function init() {
   $("patron-art").textContent = PATRON.art;
   $("patron-name").textContent = PATRON.name;
   GAME.taps.forEach((_, i) => $("taps").append(buildTap(i)));
+  fitLabels();
   GAME.glasses.forEach((_, i) => $("glasses").append(buildGlass(i)));
 
   $("done").addEventListener("click", finish);
