@@ -369,6 +369,9 @@ function finish() {
   const stats = updateStats(store.get(STATS_STORE), KEY, totalScore(state.glasses, GAME.glasses));
   store.set(STATS_STORE, stats);
   showResult(stats);
+  // Tell the server a game was finished (it only counts players; nothing
+  // about the game is sent).
+  try { navigator.sendBeacon("/beacon/fillle/done"); } catch { /* not counted, no matter */ }
 }
 
 // --- Results
