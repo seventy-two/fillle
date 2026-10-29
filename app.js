@@ -9,6 +9,7 @@ import { GLASS_SHAPES } from "./glasses.js";
 const KEY = dayKey();
 const GAME = dayGame(KEY);
 const PATRON = PATRONS[GAME.patron];
+// Stores keep the old name (fillle) so play saved before the rename carries on.
 const DAY_STORE = "fillle:day2:" + KEY; // day2: the brim-filling rules, from 10 Oct 2026
 const STATS_STORE = "fillle:stats";
 const HELP_STORE = "fillle:seen-help";
@@ -371,7 +372,7 @@ function finish() {
   showResult(stats);
   // Tell the server a game was finished (it only counts players; nothing
   // about the game is sent).
-  try { navigator.sendBeacon("/beacon/fillle/done"); } catch { /* not counted, no matter */ }
+  try { navigator.sendBeacon("/beacon/beerle/done"); } catch { /* not counted, no matter */ }
 }
 
 // --- Results

@@ -133,7 +133,7 @@ test("share text", () => {
     emptyGlass(),
   ];
   assert.equal(glassEmoji(glasses[3], "kwak"), "❌");
-  assert.equal(shareText(game, glasses, "https://0x48.io/fillle/"), "Fillle #3 · 244/500\n🟩🟨🟧❌🟥\nhttps://0x48.io/fillle/");
+  assert.equal(shareText(game, glasses, "https://0x48.io/beerle/"), "Beerle #3 · 244/500\n🟩🟨🟧❌🟥\nhttps://0x48.io/beerle/");
 });
 
 test("time until the next day's game", () => {

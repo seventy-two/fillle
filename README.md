@@ -1,4 +1,4 @@
-# fillle
+# beerle
 
 A daily game set in a Belgian bar. A patron walks up and orders five beers;
 pour each one into its glass, filling it to the brim the way Belgian bars

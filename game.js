@@ -1,4 +1,4 @@
-// Fillle's rules: the day's patron, order, taps and glasses, pouring and
+// Beerle's rules: the day's patron, order, taps and glasses, pouring and
 // scoring. Everything here is pure so it runs the same in the browser and in
 // tests.
 
@@ -12,7 +12,7 @@ export const MAX_LEVEL = 1.25; // 1 is the brim; past it foam runs over, and pas
 export const MIN_POUR = 0.5; // seconds; no glass fills faster than this
 export const MAX_POUR = 3.5; // seconds; or slower than this
 export const MIN_SPREAD = 2.5; // the slowest beer takes at least this many times as long as the fastest
-export const FIRST_DAY = "2026-10-10"; // Fillle #1
+export const FIRST_DAY = "2026-10-10"; // Beerle #1
 
 // The beers on offer, each in its own glass. volume is the glass's relative
 // size: bigger glasses tend to take longer to fill. foam is how much of a
@@ -78,7 +78,7 @@ export function dayNumber(key) {
 // dayGame builds a day's game: who orders, what they order, which taps are
 // on, the glasses on the bar (in order) and how long each takes to fill.
 export function dayGame(key) {
-  const rand = mulberry32(hash("fillle:" + key));
+  const rand = mulberry32(hash("fillle:" + key)); // its old name, kept so the days stay the same
   const patron = Math.floor(rand() * PATRONS.length);
 
   const kinds = rand() < 0.5 ? 2 : 3;
@@ -197,7 +197,7 @@ export function glassEmoji(glass, expected) {
 // shareText is the result players copy and share.
 export function shareText(game, glasses, url) {
   return [
-    `Fillle #${game.number} · ${totalScore(glasses, game.glasses)}/${GLASSES * 100}`,
+    `Beerle #${game.number} · ${totalScore(glasses, game.glasses)}/${GLASSES * 100}`,
     glasses.map((g, i) => glassEmoji(g, game.glasses[i])).join(""),
     url,
   ].join("\n");
