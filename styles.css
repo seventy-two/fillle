@@ -39,7 +39,7 @@ body {
   margin: 0;
   background: var(--page);
   color: var(--ink);
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 16px/1.5 "Petrov Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 main {
   max-width: 560px;
@@ -105,7 +105,7 @@ h1 { font-size: 34px; line-height: 1; margin: 0; letter-spacing: -0.03em; font-w
 .tap .tap-body { fill: #b9b6ad; stroke: #8d897e; stroke-width: 1.5; }
 .tap .handle { transform-origin: 30px 96px; transition: transform 0.15s; }
 .tap .handle-face { stroke: rgba(0, 0, 0, 0.25); stroke-width: 1.5; }
-.tap text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 800; letter-spacing: 0.04em; }
+.tap text { font-family: "Petrov Sans", system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 800; letter-spacing: 0.04em; }
 .tap .mini path { fill: none; stroke: var(--ink-2); stroke-width: 7; }
 .tap .name { font-size: 11px; color: var(--ink-2); line-height: 1.2; text-align: center; min-height: 26px; }
 .tap.selected { background: var(--surface); box-shadow: 0 0 0 2px var(--ink); }
