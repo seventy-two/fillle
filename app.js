@@ -374,6 +374,7 @@ function finish() {
   save();
   if (PAST) {
     showResult();
+    logToDailies(shareText(GAME, state.glasses, SHARE_URL));
     return;
   }
   const stats = updateStats(store.get(STATS_STORE), KEY, totalScore(state.glasses, GAME.glasses));
@@ -385,6 +386,23 @@ function finish() {
 }
 
 // --- Results
+
+// logToDailies logs an earlier day's result in dailies for whoever is
+// logged in there (same site, so its login comes along), which files it on
+// that puzzle's day, so it needn't be pasted. Silent if nobody is.
+async function logToDailies(text) {
+  try {
+    const cfg = await (await fetch("/dailies/api/config")).json();
+    if (!cfg.me) return;
+    const res = await fetch("/dailies/api/share", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player: cfg.me, text }),
+    });
+    const body = await res.json().catch(() => ({}));
+    $("toast").textContent = body.message || body.error || "";
+  } catch { /* dailies is out of reach: paste it there instead */ }
+}
 
 function reaction(score) {
   if (state.glasses.some((g, i) => wrongBeer(g, GAME.glasses[i]))) return "That's not what I ordered.";
