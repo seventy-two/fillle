@@ -1,12 +1,15 @@
 import {
   GLASSES, TIME_LIMIT, READY_TIME, MAX_LEVEL, beerById,
-  dayKey, dayGame, orderText, pour, froth, headShare, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji, shareText,
+  dayKey, pastKey, dayGame, orderText, pour, froth, headShare, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji, shareText,
   msUntilNextDay, updateStats,
 } from "./game.js";
 import { PATRONS } from "./patrons.js";
 import { GLASS_SHAPES } from "./glasses.js";
 
-const KEY = dayKey();
+// "#12" plays an earlier day (from dailies' Missed list): it isn't counted
+// in the stats or by the server.
+const PAST = pastKey(location.hash);
+const KEY = PAST || dayKey();
 const GAME = dayGame(KEY);
 const PATRON = PATRONS[GAME.patron];
 // Stores keep the old name (fillle) so play saved before the rename carries on.
@@ -14,6 +17,8 @@ const DAY_STORE = "fillle:day2:" + KEY; // day2: the brim-filling rules, from 10
 const STATS_STORE = "fillle:stats";
 const HELP_STORE = "fillle:seen-help";
 const SHARE_URL = location.origin + location.pathname;
+// A new hash means another day: start that one.
+addEventListener("hashchange", () => location.reload());
 const TAP_KEYS = "qwert";
 const MIXED_COLOR = "#7a6248";
 const MIXED_HEAD = "#cdbb9f";
@@ -367,6 +372,10 @@ function finish() {
   stopPour(performance.now());
   state.finished = true;
   save();
+  if (PAST) {
+    showResult();
+    return;
+  }
   const stats = updateStats(store.get(STATS_STORE), KEY, totalScore(state.glasses, GAME.glasses));
   store.set(STATS_STORE, stats);
   showResult(stats);
@@ -457,7 +466,7 @@ async function share() {
 
 function init() {
   const label = new Date(KEY + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
-  $("day").textContent = `#${GAME.number} · ${label}`;
+  $("day").textContent = `#${GAME.number} · ${label}${PAST ? " · an earlier day" : ""}`;
   $("patron-art").textContent = PATRON.art;
   $("patron-name").textContent = PATRON.name;
   GAME.taps.forEach((_, i) => $("taps").append(buildTap(i)));
