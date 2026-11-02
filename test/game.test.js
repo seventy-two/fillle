@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  GLASSES, PERFECT_TIME, MAX_LEVEL, MIN_POUR, MAX_POUR, MIN_SPREAD, BEERS, beerById,
+  GLASSES, PERFECT_TIME, MAX_LEVEL, MIN_POUR, MAX_POUR, MIN_SPREAD, BEERS, NEW_BEERS_FROM, beerById,
   dayKey, dayNumber, dayGame, orderText, pour, froth, headShare, SURGE, cupScore, emptyGlass, wrongBeer, glassScore, totalScore, glassEmoji,
   shareText, msUntilNextDay, updateStats,
 } from "../game.js";
@@ -73,7 +73,7 @@ test("the patron's order reads naturally", () => {
 });
 
 test("every beer has a distinct glass, and a head", () => {
-  assert.ok(BEERS.length >= 14);
+  assert.ok(BEERS.length >= 21);
   assert.equal(new Set(BEERS.map((b) => b.glass)).size, BEERS.length);
   assert.equal(new Set(BEERS.map((b) => b.id)).size, BEERS.length);
   for (const b of BEERS) {
@@ -149,4 +149,13 @@ test("stats track streaks across consecutive days", () => {
   assert.equal(s.streak, 2);
   s = updateStats(s, "2026-10-13", 300);
   assert.deepEqual(s, { played: 3, streak: 1, bestStreak: 2, best: 450, total: 1150, last: "2026-10-13" });
+});
+
+test("days before the new beers keep the original fourteen", () => {
+  const original = new Set(BEERS.slice(0, 14).map((b) => b.id));
+  for (const key of days(24)) {
+    for (const t of dayGame(key).taps) assert.ok(original.has(t), `${key}: ${t}`);
+  }
+  const later = new Set(days(400).filter((k) => k >= NEW_BEERS_FROM).flatMap((k) => dayGame(k).taps));
+  assert.ok([...later].some((t) => !original.has(t)), "new beers turn up afterwards");
 });

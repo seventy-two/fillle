@@ -32,7 +32,19 @@ export const BEERS = [
   { id: "kriek", name: "Lindemans Kriek", label: "KRIEK", glass: "flute", volume: 0.8, color: "#9c1c38", head: "#f7c9d2", foam: 0.12, tap: "#7a1028", ink: "#ffffff" },
   { id: "rodenbach", name: "Rodenbach", label: "RODENBACH", glass: "rodenbach", volume: 1.0, color: "#7a2a18", head: "#e9d6b8", foam: 0.06, tap: "#ad1f23", ink: "#f2d16b" },
   { id: "dekoninck", name: "De Koninck", label: "DE KONINCK", glass: "bolleke", volume: 0.8, color: "#b8651f", head: "#f3e3c4", foam: 0.15, tap: "#c8102e", ink: "#ffffff" },
+  // Added for days from NEW_BEERS_FROM.
+  { id: "chouffe", name: "La Chouffe", label: "CHOUFFE", glass: "chouffe", volume: 1.1, color: "#e3a83c", head: "#fffaf0", foam: 0.32, tap: "#8a9096", ink: "#d6262b" },
+  { id: "guldendraak", name: "Gulden Draak", label: "DRAAK", glass: "draak", volume: 1.0, color: "#a3521c", head: "#f0dcb8", foam: 0.2, tap: "#f4f2ec", ink: "#1a1a1a" },
+  { id: "rochefort", name: "Rochefort 10", label: "ROCHEFORT", glass: "rochefort", volume: 1.0, color: "#3a1d0e", head: "#dcc39a", foam: 0.14, tap: "#c9a24a", ink: "#2b1a0e" },
+  { id: "palm", name: "Palm", label: "PALM", glass: "palm", volume: 1.2, color: "#c87a26", head: "#f8ead0", foam: 0.16, tap: "#2f6d3a", ink: "#f2d16b" },
+  { id: "duchesse", name: "Duchesse de Bourgogne", label: "DUCHESSE", glass: "duchesse", volume: 0.9, color: "#6b2416", head: "#e4c9a6", foam: 0.07, tap: "#5c1a2b", ink: "#e8c56a" },
+  { id: "brugsezot", name: "Brugse Zot", label: "BRUGSE ZOT", glass: "zot", volume: 1.1, color: "#e6b443", head: "#ffffff", foam: 0.24, tap: "#f6b81a", ink: "#1a1a1a" },
+  { id: "piraat", name: "Piraat", label: "PIRAAT", glass: "piraat", volume: 1.1, color: "#d08a2a", head: "#fbf0dc", foam: 0.22, tap: "#1b1b1b", ink: "#e8d9b0" },
 ];
+// Days before NEW_BEERS_FROM drew from the first ORIGINAL_BEERS only; they
+// keep doing so, so an earlier day replayed from its number is the same game.
+export const NEW_BEERS_FROM = "2026-11-03";
+const ORIGINAL_BEERS = 14;
 export const beerById = Object.fromEntries(BEERS.map((b) => [b.id, b]));
 
 // mulberry32: a small, fast seeded PRNG.
@@ -95,7 +107,7 @@ export function dayGame(key) {
   const kinds = rand() < 0.5 ? 2 : 3;
   const splits = kinds === 2 ? [[3, 2], [4, 1]] : [[2, 2, 1], [3, 1, 1]];
   const counts = splits[Math.floor(rand() * splits.length)];
-  const beers = shuffle(BEERS, rand);
+  const beers = shuffle(key < NEW_BEERS_FROM ? BEERS.slice(0, ORIGINAL_BEERS) : BEERS, rand);
   const ordered = beers.slice(0, kinds);
   const decoys = beers.slice(kinds, kinds + 2);
   const order = ordered.map((b, i) => ({ beer: b.id, count: counts[i] }));

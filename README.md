@@ -11,8 +11,10 @@ do, within 15 seconds.
   wooden stand, Chimay's chalice, Hoegaarden's hexagonal tumbler, Stella
   Artois, Jupiler's pils glass, Orval's bowl, Delirium Tremens' tall tulip,
   Leffe's goblet, Westmalle's chalice, Tripel Karmeliet's tall flared glass,
-  Lindemans Kriek's flute, Rodenbach's straight glass and De Koninck's
-  bolleke. Each tap shows its glass's outline underneath.
+  Lindemans Kriek's flute, Rodenbach's straight glass, De Koninck's
+  bolleke, La Chouffe's tulip, Gulden Draak's flared goblet, Rochefort's
+  deep chalice, Palm's globe, Duchesse de Bourgogne's wine glass, Brugse
+  Zot's tall tapered glass and Piraat's thistle. Each tap shows its glass's outline underneath.
 - Each beer has its own head: Duvel, Orval and Westmalle's are big,
   Stella and Jupiler's skimmed to a couple of fingers, Kriek's pink, Rodenbach's barely
   there. A head grows with the beer, froths up while you pour and settles
@@ -44,6 +46,8 @@ It's a static page with no server.
   glasses, two decoy taps, and each beer's pour time: weighted by its glass's
   size, scaled so the five glasses add up to exactly 8 seconds, each between
   0.5 and 3.5 seconds, with the slowest beer at least 2.5× the fastest.
+  Days before 3 Nov 2026 draw from the original 14 beers only (seven were
+  added then), so replaying an earlier day by number gives the same game.
 - `patrons.js` has the ASCII regulars and `glasses.js` the SVG glass shapes.
   Beer rises linearly from the bottom of a glass's bowl to its brim, so a
   glass's shape changes how it looks, not how it scores. Each beer's `foam`
